@@ -1,10 +1,12 @@
 import numpy as np
-import skfuzzy as fuzz
 from skfuzzy import control as ctrl
 
 
 class Bee:
-    def __init__(self, hive, world_size, max_speed=0.1, sight_radius=0.2):
+    def __init__(self, hive,
+                 world_size,
+                 max_speed=0.1,
+                 sight_radius=20):
         self.hive = hive
         self.max_speed = max_speed
         self.world_size = world_size
@@ -27,7 +29,7 @@ class Bee:
         # Food distance: Close, medium, far
         self.food_distance = ctrl.Antecedent(np.arange(0, 26, 1), 'food_distance')
         self.food_distance.automf(3)
-        #self.food_distance["average"].view()
+        # self.food_distance["average"].view()
         # Food quantity: Low, medium, high
 
         # Bee distance: Close, medium, far
@@ -43,7 +45,6 @@ class Bee:
         # If bee distance is medium, move randomly.
         pass
 
-
     def act(self):
         # Update the fuzzy inputs
         self.update_fuzzy_inputs()
@@ -53,6 +54,7 @@ class Bee:
 
         # Update the bee's position and velocity based on the fuzzy outputs
         self.update_position_and_velocity()
+        pass
 
     def update_fuzzy_inputs(self):
         # Implement fuzzy input updates based on sensory inputs
@@ -99,10 +101,10 @@ class Bee:
         print(self.fuzzy_inputs)
 
     def determine_fuzzy_outputs(self):
-        #todo implement
+        # todo implement
         pass
-        self.fuzzy_outputs['move_direction'] = 1
-        self.fuzzy_outputs['move_speed'] = 1
+        self.fuzzy_outputs['move_direction'] = 0.2
+        self.fuzzy_outputs['move_speed'] = 0.1
 
     def update_position_and_velocity(self):
         # Update position based on move direction and move speed

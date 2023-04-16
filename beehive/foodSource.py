@@ -2,15 +2,11 @@ import numpy as np
 
 
 class FoodSource:
-    def __init__(self, max_amount = 1):
-        self.x = np.random.rand()
-        self.y = np.random.rand()
+    def __init__(self, world_size, max_amount=10):
+        self.x = np.random.rand() * world_size
+        self.y = np.random.rand() * world_size
         self.max_amount = max_amount
         self.current_amount = max_amount
-        self.fuzzy_inputs = {
-            'food_distance': None,
-            'food_amount': None,
-        }
 
     def get_amount(self):
         return self.current_amount

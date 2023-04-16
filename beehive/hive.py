@@ -5,9 +5,9 @@ from beehive.foodSource import FoodSource
 
 
 class Hive:
-    def __init__(self, num_bees, num_food_sources, world_size):
-        self.x = world_size/2
-        self.y = world_size/2
+    def __init__(self, num_bees, num_food_sources, world_size=50):
+        self.x = world_size / 2
+        self.y = world_size / 2
         self.num_bees = num_bees
         self.num_food_sources = num_food_sources
         self.world_size = world_size
@@ -17,7 +17,7 @@ class Hive:
             self.bees.append(bee)
         self.food_sources = []
         for i in range(num_food_sources):
-            food_source = FoodSource()
+            food_source = FoodSource(world_size)
             self.food_sources.append(food_source)
 
     def simulate(self, num_iterations):
@@ -42,3 +42,4 @@ class Hive:
         plt.scatter(self.x, self.y, c='r', label="Hive")
         plt.legend()
         plt.show()
+        pass
