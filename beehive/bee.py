@@ -4,16 +4,18 @@ import skfuzzy as fuzz
 
 
 class Bee:
-    def __init__(self, hive,
-                 world_size,
+    def __init__(self,
+                 hive,
+                 x,
+                 y,
                  max_speed=3,
-                 sight_radius=20):
+                 sight_radius=20
+                 ):
         self.hive = hive
         self.max_speed = max_speed
-        self.world_size = world_size
         self.sight_radius = sight_radius
-        self.x = np.random.rand() * world_size
-        self.y = np.random.rand() * world_size
+        self.x = x
+        self.y = y
         self.vx = 0.0
         self.vy = 0.0
         self.fuzzy_inputs = {

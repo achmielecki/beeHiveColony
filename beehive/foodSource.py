@@ -2,9 +2,9 @@ import numpy as np
 
 
 class FoodSource:
-    def __init__(self, world_size, max_amount=10):
-        self.x = np.random.rand() * world_size
-        self.y = np.random.rand() * world_size
+    def __init__(self, x, y, max_amount=10):
+        self.x = x
+        self.y = y
         self.max_amount = max_amount
         self.current_amount = np.random.rand() * max_amount
 
