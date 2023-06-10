@@ -1,45 +1,70 @@
 import numpy as np
-import matplotlib.pyplot as plt
+
 from beehive.bee import Bee
-from beehive.foodSource import FoodSource
 
 
 class Hive:
-    def __init__(self, num_bees, num_food_sources, world_size=50):
-        self.x = world_size / 2
-        self.y = world_size / 2
+    def __init__(
+            self,
+            world,
+            num_bees,
+            x,
+            y,
+            area_size=40
+    ):
+        self.world = world
         self.num_bees = num_bees
-        self.num_food_sources = num_food_sources
-        self.world_size = world_size
+        self.x = x
+        self.y = y
+        self.area_size = area_size
         self.bees = []
+        self.spawn_bees(num_bees)
+        self.food_stored = 0
+
+    def spawn_bees(self, num_bees):
         for i in range(num_bees):
-            bee = Bee(self, world_size)
-            self.bees.append(bee)
-        self.food_sources = []
-        for i in range(num_food_sources):
-            food_source = FoodSource(world_size)
-            self.food_sources.append(food_source)
+            self.spawn_bee()
 
-    def simulate(self, num_iterations):
-        for i in range(num_iterations):
-            for bee in self.bees:
-                bee.act()
-            self.plot()
+    def spawn_bee(self):
+        self.bees.append(
+            Bee(
+                self,
+                self.x + np.random.rand() * self.area_size,
+                self.y + np.random.rand() * self.area_size,
+                sight_radius=self.area_size
+            )
+        )
 
-    def plot(self):
+    def leave_food(self, count):
+        self.food_stored += count
+
+    def get_food_sources(self):
+        return self.world.get_food_sources()
+
+    def get_bees_x_positions(self):
         x_bees = []
-        y_bees = []
         for bee in self.bees:
             x_bees.append(bee.x)
+        return x_bees
+
+    def get_bees_y_positions(self):
+        y_bees = []
+        for bee in self.bees:
             y_bees.append(bee.y)
-        x_food_sources = []
-        y_food_sources = []
-        for food_source in self.food_sources:
-            x_food_sources.append(food_source.x)
-            y_food_sources.append(food_source.y)
-        plt.scatter(x_bees, y_bees, c='b', label='Bees')
-        plt.scatter(x_food_sources, y_food_sources, c='g', label='Food Sources')
-        plt.scatter(self.x, self.y, c='r', label="Hive")
-        plt.legend()
-        plt.show()
-        pass
+        return y_bees
+
+    def get_y(self):
+        return self.y
+
+    def get_x(self):
+        return self.x
+
+    def get_pos(self):
+        return self.x, self.y
+
+    def get_bees(self):
+        return self.bees
+
+    def simulate(self):
+        for bee in self.bees:
+            bee.act()

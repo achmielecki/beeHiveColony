@@ -1,5 +1,6 @@
-from beehive.hive import Hive
+from beehive.world import World
+from hiveGUI import HiveGUI
 
-hive = Hive(num_bees=100, num_food_sources=3)
-hive.simulate(num_iterations=100)
-hive.plot()
+world = World(num_hives=1, num_bees_per_hive=1, num_food_sources=6)
+gui = HiveGUI(world)
+gui.run()
