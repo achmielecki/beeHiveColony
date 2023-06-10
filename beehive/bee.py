@@ -67,10 +67,12 @@ class Bee:
 
         self.hive_distance = ctrl.Antecedent(np.arange(0, sight_radius, 1), 'hive_distance')
         self.hive_distance.automf(5, variable_type='quant')
-        self.back_rule1 = ctrl.Rule(self.hive_distance['low'], self.move_speed["slow"])
-        self.back_rule2 = ctrl.Rule(self.hive_distance['high'], self.move_speed["fast"])
-        self.back_rule3 = ctrl.Rule(self.hive_distance['lower'], self.move_speed["stop"])
-        self.back_move_speed_ctrl = ctrl.ControlSystem([self.back_rule1, self.back_rule2, self.back_rule3])
+        self.back_rule1 = ctrl.Rule(self.hive_distance['lower'], self.move_speed["stop"])
+        self.back_rule2 = ctrl.Rule(self.hive_distance['low'], self.move_speed["slow"])
+        self.back_rule3 = ctrl.Rule(self.hive_distance['average'], self.move_speed["slow"])
+        self.back_rule4 = ctrl.Rule(self.hive_distance['high'], self.move_speed["fast"])
+        self.back_rule5 = ctrl.Rule(self.hive_distance['higher'], self.move_speed["fast"])
+        self.back_move_speed_ctrl = ctrl.ControlSystem([self.back_rule1, self.back_rule2, self.back_rule3, self.back_rule4, self.back_rule5])
         self.back_move_speed_ctrl_sim = ctrl.ControlSystemSimulation(self.back_move_speed_ctrl)
 
     def act(self):
@@ -141,6 +143,7 @@ class Bee:
         food_distances = [(np.sqrt((food.x - self.x) ** 2 + (food.y - self.y) ** 2), food) for food in
                           self.hive.get_food_sources()]
         food_distances = [x for x in food_distances if x[1].get_amount() > 3]
+        # todo what if no food
         return min(food_distances, key=lambda t: t[0])
 
     def determine_fuzzy_outputs(self):

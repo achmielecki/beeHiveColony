@@ -21,7 +21,7 @@ class World:
         self.hives_area = hives_area
         self.hives = []
         self.food_sources = []
-        self.spawn_hives(num_bees_per_hive)
+        self.spawn_hives(num_hives)
         self.spawn_food(num_food_sources, world_size)
 
     def spawn_food(self, num_food_sources, world_size):
@@ -42,8 +42,8 @@ class World:
     def get_size(self):
         return self.world_size
 
-    def spawn_hives(self, num_bees):
-        for i in range(num_bees):
+    def spawn_hives(self, num_hives):
+        for i in range(num_hives):
             self.spawn_hive()
 
     def spawn_hive(self):
