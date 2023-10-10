@@ -1,6 +1,6 @@
 import numpy as np
 
-from beehive.bee import Bee
+from beehive.bee.bee import Bee
 
 
 class Hive:
