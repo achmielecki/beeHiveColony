@@ -12,6 +12,7 @@ class Hive:
             y,
             area_size=40
     ):
+        self.food_stored = 0
         self.world = world
         self.num_bees = num_bees
         self.x = x
@@ -19,11 +20,17 @@ class Hive:
         self.area_size = area_size
         self.bees = []
         self.spawn_bees(num_bees)
-        self.food_stored = 0
+        self.nectar_stored = 0
+        self.current_dances = []
+        self.current_scouts = 0
+        self.max_scouts = 1
 
     def spawn_bees(self, num_bees):
         for i in range(num_bees):
             self.spawn_bee()
+
+    def get_current_dances(self):
+        return self.current_dances
 
     def spawn_bee(self):
         self.bees.append(

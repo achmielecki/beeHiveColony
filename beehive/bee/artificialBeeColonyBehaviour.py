@@ -1,0 +1,197 @@
+from enum import Enum
+import numpy as np
+
+bee_max_speed = 8.2  # m/s
+bee_min_speed = 4.9  # m/s
+bee_max_range_for_water = 3000  # m
+bee_max_range_for_pollen = 6000  # m
+bee_max_range_for_nectar = 12000  # m
+max_life_time = 10  # days
+min_life_time = 5  # days
+bee_nectar_max_carry = 0.06  # grams https://ucanr.edu/blogs/blogcore/postdetail.cfm?postnum=43385
+bee_sight_range = 10  # m
+chance_of_becoming_scout = 0.1
+
+
+# https://en.wikipedia.org/wiki/Artificial_bee_colony_algorithm
+class ArtificialBeeColonyBehaviour:
+    def __init__(self, bee):
+        self.is_dancing = False
+        self.spotted_food = None
+        self.distance_to_hive = None
+        self.speed = bee_min_speed + ((bee_max_speed - bee_min_speed) * np.random.rand())
+        self.my_food_source = None
+        self.bee = bee
+        self.role = self.init_role()
+        self.carried_nectar = 0
+        self.max_carry = bee_nectar_max_carry
+        self.scout_steps = 0
+        self.current_direction = [1, 1]
+
+    def init_role(self):
+        return Role(2)
+
+    def act(self):
+        match self.role:
+            case Role.employed:
+                self.harvest_your_food_source()
+            case Role.onlooker:
+                self.onlook()
+            case Role.scout:
+                self.scout()
+
+    def onlook(self):
+        self.stay_around_hive()
+        if self.are_there_any_dances():
+            self.my_food_source = self.choose_best_dance()
+            self.role = Role.employed
+        else:
+            if np.random.rand() < chance_of_becoming_scout:
+                if self.bee.hive.current_scouts < self.bee.hive.max_scouts:
+                    self.bee.hive.current_scouts += 1
+                    self.role = Role.scout
+
+    def stay_around_hive(self):
+        self.update_distance_to_hive()
+        if self.distance_to_hive > 1:
+            self.go_to_hive()
+        else:
+            self.float_around_hive()
+
+    def update_distance_to_hive(self):
+        self.distance_to_hive = self.calculate_distance_to_hive()
+
+    def calculate_distance_to_hive(self) -> float:
+        return np.sqrt((self.bee.x - self.bee.hive.x) ** 2 + (self.bee.y - self.bee.hive.y) ** 2)
+
+    def go_to_hive(self):
+        self.go_towards_object(self.bee.hive, self.speed)
+
+    def go_towards_object(self, object, move_speed):
+        fx, fy = object.get_pos()
+        dx = self.bee.x - fx
+        dy = self.bee.y - fy
+        if dx < 0:
+            xdir = 1
+        else:
+            xdir = -1
+
+        if dy < 0:
+            ydir = 1
+        else:
+            ydir = -1
+        if move_speed > abs(dx):
+            x_movement = abs(dx)
+        else:
+            x_movement = move_speed
+        if move_speed > abs(dy):
+            y_movement = abs(dy)
+        else:
+            y_movement = move_speed
+        self.bee.x += xdir * x_movement
+        self.bee.y += ydir * y_movement
+
+    def float_around_hive(self):
+        pass
+
+    def are_there_any_dances(self):
+        return self.bee.hive.get_current_dances()
+
+    def choose_best_dance(self):
+        dances = self.bee.hive.get_current_dances()
+        dance = list(sorted(dances, key=lambda it: it[1].current_amount))[-1]
+        dance[0].stop_dance()
+        return dance[1]
+
+    def stop_dance(self):
+        self.role = Role.onlooker
+        self.bee.hive.current_dances.remove((self, self.spotted_food))
+        self.spotted_food = None
+        self.bee.hive.current_scouts -= 1
+
+    def harvest_your_food_source(self):
+        if self.carried_nectar > 0:
+            self.update_distance_to_hive()
+            if self.distance_to_hive > 0.05:
+                self.go_to_hive()
+            else:
+                self.leave_food_in_hive()
+        if self.my_food_source is None:
+            self.role = Role(2)
+        else:
+            if self.carried_nectar == 0:
+                if self.distance_to_your_food() > 0.05:
+                    self.go_to_your_food_source()
+                else:
+                    self.harvest()
+                    if self.my_food_is_not_efficient_anymore():
+                        self.abandon_my_food_source()
+
+    def distance_to_your_food(self) -> float:
+        return np.sqrt((self.my_food_source.x - self.bee.x) ** 2 + (self.my_food_source.y - self.bee.y) ** 2)
+
+    def go_to_your_food_source(self):
+        self.go_towards_object(self.my_food_source, self.speed)
+
+    def harvest(self):
+        self.carried_nectar = self.my_food_source.extract_food(self.max_carry)
+
+    def my_food_is_not_efficient_anymore(self):
+        return self.my_food_source.current_amount < self.max_carry
+
+    def abandon_my_food_source(self):
+        self.my_food_source = None
+
+    def leave_food_in_hive(self):
+        self.bee.hive.leave_nectar(self.bee.carried_nectar)
+        self.carried_nectar = 0
+
+    def scout(self):
+        if self.is_dancing:
+            return
+        if self.spotted_food:
+            self.update_distance_to_hive()
+            if self.distance_to_hive < 0.05:
+                self.dance()
+            else:
+                self.go_to_hive()
+            return
+        spotted_food = self.spot_food()
+        if spotted_food:
+            self.spotted_food = spotted_food
+            return
+        if self.scout_steps * np.random.rand() > 10:
+            self.random_direction()
+            self.scout_steps = 0
+        self.go_towards_direction()
+        self.scout_steps += 1
+
+    def spot_food(self):
+        foods = self.bee.hive.world.get_food_in_range(self.bee.x, self.bee.y, bee_sight_range)
+        if foods:
+            return foods[0]
+        return None
+
+    def dance(self):
+        self.is_dancing = True
+        self.bee.hive.current_dances.append((self, self.spotted_food))
+
+    def random_direction(self):
+        if np.random.rand() > 0.5:
+            self.current_direction[0] = 1
+        else:
+            self.current_direction[0] = -1
+        if np.random.rand() > 0.5:
+            self.current_direction[1] = 1
+        else:
+            self.current_direction[1] = -1
+
+    def go_towards_direction(self):
+        self.bee.x += self.current_direction[0] * self.speed
+        self.bee.y += self.current_direction[1] * self.speed
+
+
+class Role(Enum):
+    employed = 1
+    onlooker = 2
+    scout = 3

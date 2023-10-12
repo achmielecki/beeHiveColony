@@ -1,8 +1,9 @@
 import numpy as np
 
+flower_max_nectar_carry = 0.007  # grams https://royalsocietypublishing.org/doi/10.1098/rstb.2021.0163
 
 class FoodSource:
-    def __init__(self, x, y, max_amount=10, spawn_rate=0.03):
+    def __init__(self, x, y, max_amount=flower_max_nectar_carry*30*np.random.rand(), spawn_rate=0):
         self.spawn_rate = spawn_rate
         self.x = x
         self.y = y
