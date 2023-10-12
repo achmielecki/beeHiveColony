@@ -23,7 +23,7 @@ class Hive:
         self.nectar_stored = 0
         self.current_dances = []
         self.current_scouts = 0
-        self.max_scouts = 1
+        self.max_scouts = num_bees/2
 
     def spawn_bees(self, num_bees):
         for i in range(num_bees):
@@ -41,8 +41,8 @@ class Hive:
             )
         )
 
-    def leave_food(self, count):
-        self.food_stored += count
+    def leave_nectar(self, count):
+        self.nectar_stored += count
 
     def get_food_sources(self):
         return self.world.get_food_sources()

@@ -1,5 +1,6 @@
 import time
 import pygame
+from beehive.bee.artificialBeeColonyBehaviour import Role
 
 
 class HiveGUI:
@@ -41,7 +42,10 @@ class HiveGUI:
 
     def draw_hive_bees(self, hive):
         for bee in hive.get_bees():
-            pygame.draw.circle(self.screen, (0, 0, 255), (self.scale(bee.get_x()), self.scale(bee.get_y())), 3)
+            if bee.behaviour.role == Role.scout:
+                pygame.draw.circle(self.screen, (204, 102, 0), (self.scale(bee.get_x()), self.scale(bee.get_y())), 3)
+            else:
+                pygame.draw.circle(self.screen, (0, 0, 255), (self.scale(bee.get_x()), self.scale(bee.get_y())), 3)
 
     def draw_food_sources(self, food_sources):
         for food_source in food_sources:

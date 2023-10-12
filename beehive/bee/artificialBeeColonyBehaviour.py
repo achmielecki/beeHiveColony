@@ -10,7 +10,8 @@ max_life_time = 10  # days
 min_life_time = 5  # days
 bee_nectar_max_carry = 0.06  # grams https://ucanr.edu/blogs/blogcore/postdetail.cfm?postnum=43385
 bee_sight_range = 10  # m
-chance_of_becoming_scout = 0.1
+chance_of_becoming_scout = 0.001
+flower_max_nectar_carry = 0.007
 
 
 # https://en.wikipedia.org/wiki/Artificial_bee_colony_algorithm
@@ -168,6 +169,7 @@ class ArtificialBeeColonyBehaviour:
 
     def spot_food(self):
         foods = self.bee.hive.world.get_food_in_range(self.bee.x, self.bee.y, bee_sight_range)
+        foods = list(filter(lambda it: it.current_amount > flower_max_nectar_carry, foods))
         if foods:
             return foods[0]
         return None
