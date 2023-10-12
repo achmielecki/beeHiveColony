@@ -11,8 +11,8 @@ class World:
             num_hives,
             num_bees_per_hive,
             num_food_sources,
-            world_size=300,
-            hives_area=145
+            world_size=50000,
+            hives_area=5000
     ):
         self.num_hives = num_hives
         self.num_bees_per_hive = num_bees_per_hive

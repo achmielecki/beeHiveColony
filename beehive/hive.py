@@ -30,8 +30,7 @@ class Hive:
             Bee(
                 self,
                 self.x + np.random.rand() * self.area_size,
-                self.y + np.random.rand() * self.area_size,
-                sight_radius=self.area_size
+                self.y + np.random.rand() * self.area_size
             )
         )
 

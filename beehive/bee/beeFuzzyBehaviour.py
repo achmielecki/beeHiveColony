@@ -2,10 +2,20 @@ import numpy as np
 import skfuzzy as fuzz
 from skfuzzy import control as ctrl
 
+bee_max_speed = 8.2  # m/s
+bee_min_speed = 4.9  # m/s
+bee_max_range_for_water = 3000  # m
+bee_max_range_for_pollen = 6000  # m
+bee_max_range_for_nectar = 12000  # m
+max_life_time = 10  # days
+min_life_time = 5  # days
+
 
 class BeeFuzzyBehaviour:
 
     def __init__(self, bee):
+        self.max_speed = 8.2
+        self.movement_from_hive_radius = 12000
         self.bee = bee
         self.fuzzy_inputs = {
             'food_distance': None,
@@ -19,7 +29,7 @@ class BeeFuzzyBehaviour:
             'move_speed': None
         }
         # Food distance: Low, average, high
-        self.food_distance = ctrl.Antecedent(np.arange(0, self.bee.sight_radius, 1), 'food_distance')
+        self.food_distance = ctrl.Antecedent(np.arange(0, self.movement_from_hive_radius, 1), 'food_distance')
         self.food_distance.automf(5, variable_type='quant')
         # Food quantity: Low, average, high
         self.food_quantity = ctrl.Antecedent(np.arange(0, 10, 1), 'food_quantity')
@@ -29,10 +39,11 @@ class BeeFuzzyBehaviour:
         # Bee cohesion: Poor, good
         # Move direction: Towards, away
         # Move speed: stop, slow, fast
-        self.move_speed = ctrl.Consequent(np.arange(0, self.bee.max_speed, 1), 'move_speed')
-        self.move_speed["stop"] = fuzz.trimf(self.move_speed.universe, [0, 0, self.bee.max_speed * (4 / 9)])
-        self.move_speed["slow"] = fuzz.trimf(self.move_speed.universe, [1, self.bee.max_speed / 2, self.bee.max_speed])
-        self.move_speed["fast"] = fuzz.trimf(self.move_speed.universe, [self.bee.max_speed * (2 / 3), self.bee.max_speed, self.bee.max_speed])
+        self.move_speed = ctrl.Consequent(np.arange(0, self.max_speed, 1), 'move_speed')
+        self.move_speed["stop"] = fuzz.trimf(self.move_speed.universe, [0, 0, self.max_speed * (4 / 9)])
+        self.move_speed["slow"] = fuzz.trimf(self.move_speed.universe, [1, self.max_speed / 2, self.max_speed])
+        self.move_speed["fast"] = fuzz.trimf(self.move_speed.universe,
+                                             [self.max_speed * (2 / 3), self.max_speed, self.max_speed])
         # If food distance is close and food quantity is high, move towards the food source at a fast speed.
         self.rule1 = ctrl.Rule(self.food_distance['lower'], self.move_speed["stop"])
         self.rule2 = ctrl.Rule(self.food_distance['low'], self.move_speed["slow"])
@@ -48,7 +59,7 @@ class BeeFuzzyBehaviour:
         self.move_speed_ctrl = ctrl.ControlSystem([self.rule1, self.rule2, self.rule3, self.rule4, self.rule5])
         self.move_speed_ctrl_sim = ctrl.ControlSystemSimulation(self.move_speed_ctrl)
 
-        self.hive_distance = ctrl.Antecedent(np.arange(0, self.bee.sight_radius, 1), 'hive_distance')
+        self.hive_distance = ctrl.Antecedent(np.arange(0, self.movement_from_hive_radius, 1), 'hive_distance')
         self.hive_distance.automf(5, variable_type='quant')
         self.back_rule1 = ctrl.Rule(self.hive_distance['lower'], self.move_speed["stop"])
         self.back_rule2 = ctrl.Rule(self.hive_distance['low'], self.move_speed["slow"])
@@ -59,10 +70,46 @@ class BeeFuzzyBehaviour:
             [self.back_rule1, self.back_rule2, self.back_rule3, self.back_rule4, self.back_rule5])
         self.back_move_speed_ctrl_sim = ctrl.ControlSystemSimulation(self.back_move_speed_ctrl)
 
+        self.nearest_food_distance = None
+        self.nearest_food = None
+
+        self.hive_distance_value = np.sqrt((self.bee.x - self.bee.hive.x) ** 2 + (self.bee.y - self.bee.hive.y) ** 2)
+
+    def act(self):
+        if self.bee.carried_food == 0:
+            self.go_for_food()
+        else:
+            self.move_food_back_to_hive()
+        pass
+
     def go_for_food(self):
-        self.update_food_searching_fuzzy_inputs()
+        self.update_nearest_food()
+        outputs = self.go_to_food()
+        # Update the bee's position and velocity based on the fuzzy outputs
+        self.update_position_and_velocity(self.nearest_food, outputs['move_speed'])
+        if self.nearest_food_distance < 2:
+            self.extract_food(self.nearest_food)
+
+    def update_nearest_food(self):
+        self.nearest_food_distance, self.nearest_food = self.get_nearest_food()
+
+    def get_nearest_food(self):
+        food_distances = [(np.sqrt((food.x - self.bee.x) ** 2 + (food.y - self.bee.y) ** 2), food) for food in
+                          self.bee.hive.get_food_sources()]
+        food_distances = [x for x in food_distances if x[1].get_amount() > 3]
+        # todo what if no food
+        return min(food_distances, key=lambda t: t[0])
+
+    def go_to_food(self):
+        self.update_food_searching_fuzzy_inputs(self.bee.x, self.bee.y, self.nearest_food_distance, self.nearest_food.current_amount)
         self.determine_food_searching_fuzzy_outputs()
         return self.fuzzy_outputs
+
+    def move_food_back_to_hive(self):
+        outputs = self.go_to_hive()
+        self.update_position_and_velocity(self.bee.hive, outputs["move_speed"])
+        if self.distance_to_hive() < 2:
+            self.bee.leave_food_in_hive()
 
     def go_to_hive(self):
         self.update_hive_searching_fuzzy_inputs()
@@ -79,32 +126,21 @@ class BeeFuzzyBehaviour:
         self.fuzzy_outputs['move_direction'] = 1
         self.fuzzy_outputs['move_speed'] = self.back_move_speed_ctrl_sim.output["move_speed"]
 
-    def update_food_searching_fuzzy_inputs(self):
+    def update_food_searching_fuzzy_inputs(self, x, y, nearest_food_distance, nearest_food_amount):
         # Implement fuzzy input updates based on sensory inputs
 
         # Determine the distance to the nearest food source
-        self.fuzzy_inputs['food_distance'] = self.bee.nearest_food_distance
+        self.fuzzy_inputs['food_distance'] = nearest_food_distance
 
         # Determine the amount of the nearest food source
-        self.fuzzy_inputs['food_quantity'] = self.bee.nearest_food.get_amount()
-
-        # Fuzzify bee alignment
-        bee_angles = np.arctan2(self.bee.y - np.array([bee.y for bee in self.bee.hive.bees]),
-                                self.bee.x - np.array([bee.x for bee in self.bee.hive.bees]))
-        avg_bee_angle = np.arctan2(np.mean(np.sin(bee_angles)), np.mean(np.cos(bee_angles)))
-        self.fuzzy_inputs['bee_alignment'] = avg_bee_angle
-
-        # Fuzzify bee cohesion
-        mean_x = np.mean([bee.x for bee in self.bee.hive.bees])
-        mean_y = np.mean([bee.y for bee in self.bee.hive.bees])
-        self.fuzzy_inputs['bee_cohesion'] = np.arctan2(mean_y - self.bee.y, mean_x - self.bee.x)
+        self.fuzzy_inputs['food_quantity'] = nearest_food_amount
 
         # Get neighboring bees within sight radius
         neighboring_bees = []
         for bee in self.bee.hive.bees:
             if bee != self:
                 distance_to_bee = np.sqrt((self.bee.x - bee.x) ** 2 + (self.bee.y - bee.y) ** 2)
-                if distance_to_bee <= self.bee.sight_radius:
+                if distance_to_bee <= self.movement_from_hive_radius:
                     neighboring_bees.append(bee)
 
         # Calculate distance to each neighboring bee and update fuzzy input
@@ -120,10 +156,47 @@ class BeeFuzzyBehaviour:
         # print(self.fuzzy_inputs)
 
     def determine_food_searching_fuzzy_outputs(self):
-        #todo implement
+        # todo implement
         self.move_speed_ctrl_sim.input["food_distance"] = self.fuzzy_inputs['food_distance']
         self.move_speed_ctrl_sim.input["food_quantity"] = self.fuzzy_inputs['food_quantity']
         self.move_speed_ctrl_sim.compute()
 
         self.fuzzy_outputs['move_direction'] = 1
         self.fuzzy_outputs['move_speed'] = self.move_speed_ctrl_sim.output["move_speed"]
+
+    def update_position_and_velocity(self, object, move_speed):
+        fx, fy = object.get_pos()
+
+        dx = self.bee.x - fx
+        dy = self.bee.y - fy
+
+        if dx < 0:
+            xdir = 1
+        else:
+            xdir = -1
+
+        if dy < 0:
+            ydir = 1
+        else:
+            ydir = -1
+
+        self.bee.x += xdir * move_speed
+        self.bee.y += ydir * move_speed
+
+        # Limit movement range to sight radius
+        if self.hive_distance_value > self.movement_from_hive_radius:
+            self.bee.x = self.bee.hive.x + self.movement_from_hive_radius * (self.bee.x - self.bee.hive.x) / self.hive_distance_value
+            self.bee.y = self.bee.hive.y + self.movement_from_hive_radius * (self.bee.y - self.bee.hive.y) / self.hive_distance_value
+
+        # Update velocity based on new position
+        self.bee.vx = self.bee.x - self.bee.hive.x
+        self.bee.vy = self.bee.y - self.bee.hive.y
+
+        # Limit speed to max speed
+        speed = np.sqrt(self.bee.vx ** 2 + self.bee.vy ** 2)
+        if speed > self.max_speed:
+            self.bee.vx *= self.max_speed / speed
+            self.bee.vy *= self.max_speed / speed
+            
+    def distance_to_hive(self) -> float:
+        return np.sqrt((self.bee.x - self.bee.hive.x) ** 2 + (self.bee.y - self.bee.hive.y) ** 2)
