@@ -8,7 +8,7 @@ max_life_time = 10  # days
 min_life_time = 5  # days
 bee_nectar_max_carry = 0.06  # grams https://ucanr.edu/blogs/blogcore/postdetail.cfm?postnum=43385
 bee_sight_range = 5  # m
-chance_of_becoming_scout = 1 #0.001
+chance_of_becoming_scout = 0.001
 flower_max_nectar_carry = 0.007
 
 
