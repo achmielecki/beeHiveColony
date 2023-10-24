@@ -17,6 +17,8 @@ class BeeFuzzyBehaviour:
         self.max_speed = 8.2
         self.movement_from_hive_radius = 12000
         self.bee = bee
+        self.bee.vx = 0.0
+        self.bee.vy = 0.0
         self.fuzzy_inputs = {
             'food_distance': None,
             'food_quantity': None,

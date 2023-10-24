@@ -1,16 +1,14 @@
 from enum import Enum
 import numpy as np
+import math
 
 bee_max_speed = 8.2  # m/s
 bee_min_speed = 4.9  # m/s
-bee_max_range_for_water = 3000  # m
-bee_max_range_for_pollen = 6000  # m
-bee_max_range_for_nectar = 12000  # m
 max_life_time = 10  # days
 min_life_time = 5  # days
 bee_nectar_max_carry = 0.06  # grams https://ucanr.edu/blogs/blogcore/postdetail.cfm?postnum=43385
-bee_sight_range = 10  # m
-chance_of_becoming_scout = 0.001
+bee_sight_range = 5  # m
+chance_of_becoming_scout = 1 #0.001
 flower_max_nectar_carry = 0.007
 
 
@@ -27,7 +25,7 @@ class ArtificialBeeColonyBehaviour:
         self.carried_nectar = 0
         self.max_carry = bee_nectar_max_carry
         self.scout_steps = 0
-        self.current_direction = [1, 1]
+        self.current_direction = 1 #angle in radians
 
     def init_role(self):
         return Role(2)
@@ -66,31 +64,18 @@ class ArtificialBeeColonyBehaviour:
         return np.sqrt((self.bee.x - self.bee.hive.x) ** 2 + (self.bee.y - self.bee.hive.y) ** 2)
 
     def go_to_hive(self):
-        self.go_towards_object(self.bee.hive, self.speed)
+        self.go_towards_object(self.bee.hive)
 
-    def go_towards_object(self, object, move_speed):
+    def go_towards_object(self, object):
         fx, fy = object.get_pos()
-        dx = self.bee.x - fx
-        dy = self.bee.y - fy
-        if dx < 0:
-            xdir = 1
+        dx = fx - self.bee.x
+        dy = fy - self.bee.y
+        angle_radians = math.atan2(dy, dx)
+        distance = math.sqrt(dx*dx + dy*dy)
+        if distance > self.speed:
+            self.go_towards_direction(angle_radians, self.speed)
         else:
-            xdir = -1
-
-        if dy < 0:
-            ydir = 1
-        else:
-            ydir = -1
-        if move_speed > abs(dx):
-            x_movement = abs(dx)
-        else:
-            x_movement = move_speed
-        if move_speed > abs(dy):
-            y_movement = abs(dy)
-        else:
-            y_movement = move_speed
-        self.bee.x += xdir * x_movement
-        self.bee.y += ydir * y_movement
+            self.go_towards_direction(angle_radians, distance)
 
     def float_around_hive(self):
         pass
@@ -132,7 +117,7 @@ class ArtificialBeeColonyBehaviour:
         return np.sqrt((self.my_food_source.x - self.bee.x) ** 2 + (self.my_food_source.y - self.bee.y) ** 2)
 
     def go_to_your_food_source(self):
-        self.go_towards_object(self.my_food_source, self.speed)
+        self.go_towards_object(self.my_food_source)
 
     def harvest(self):
         self.carried_nectar = self.my_food_source.extract_food(self.max_carry)
@@ -144,7 +129,7 @@ class ArtificialBeeColonyBehaviour:
         self.my_food_source = None
 
     def leave_food_in_hive(self):
-        self.bee.hive.leave_nectar(self.bee.carried_nectar)
+        self.bee.hive.leave_nectar(self.carried_nectar)
         self.carried_nectar = 0
 
     def scout(self):
@@ -164,7 +149,7 @@ class ArtificialBeeColonyBehaviour:
         if self.scout_steps * np.random.rand() > 10:
             self.random_direction()
             self.scout_steps = 0
-        self.go_towards_direction()
+        self.go_towards_direction(self.current_direction, self.speed)
         self.scout_steps += 1
 
     def spot_food(self):
@@ -179,18 +164,11 @@ class ArtificialBeeColonyBehaviour:
         self.bee.hive.current_dances.append((self, self.spotted_food))
 
     def random_direction(self):
-        if np.random.rand() > 0.5:
-            self.current_direction[0] = 1
-        else:
-            self.current_direction[0] = -1
-        if np.random.rand() > 0.5:
-            self.current_direction[1] = 1
-        else:
-            self.current_direction[1] = -1
+        self.current_direction = math.pi * 2 * np.random.rand()
 
-    def go_towards_direction(self):
-        self.bee.x += self.current_direction[0] * self.speed
-        self.bee.y += self.current_direction[1] * self.speed
+    def go_towards_direction(self, direction, speed):
+        self.bee.x += math.cos(direction) * speed
+        self.bee.y += math.sin(direction) * speed
 
 
 class Role(Enum):

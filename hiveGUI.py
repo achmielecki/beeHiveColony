@@ -13,11 +13,8 @@ class HiveGUI:
         pygame.display.set_caption("BeeHiveColony")
 
     def run(self):
-        i = 1
         running = True
         while running:
-            print("Iter: " + str(i))
-            i += 1
             time.sleep(0.1)
             self.world.simulate()
             for event in pygame.event.get():

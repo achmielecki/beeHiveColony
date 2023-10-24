@@ -13,8 +13,6 @@ class Bee:
         self.hive = hive
         self.x = x
         self.y = y
-        self.vx = 0.0
-        self.vy = 0.0
         self.behaviour = ArtificialBeeColonyBehaviour(self)
 
     def act(self):

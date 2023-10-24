@@ -1,5 +1,6 @@
 import matplotlib.pyplot as plt
 import numpy as np
+import datetime
 
 from beehive.foodSource import FoodSource
 from beehive.hive import Hive
@@ -18,7 +19,7 @@ class World:
             num_hives,
             num_bees_per_hive,
             num_food_sources,
-            world_size=12000,
+            world_size=2000,
             hives_area=15
     ):
         self.num_hives = num_hives
@@ -30,6 +31,7 @@ class World:
         self.food_sources = []
         self.spawn_hives(num_hives)
         self.spawn_food(num_food_sources, world_size)
+        self.time = datetime.datetime(2000, 1, 1)
 
     def spawn_food(self, num_food_sources, world_size):
         for i in range(num_food_sources):
@@ -80,7 +82,12 @@ class World:
                 hive.simulate()
             for food in self.food_sources:
                 food.simulate()
-            # self.plot()
+        self.time_goes_forward()
+
+    def time_goes_forward(self):
+        self.time += datetime.timedelta(seconds=1)
+        if self.time.second == 0:
+            print(self.time)
 
     def plot(self):
         x_hives = []
