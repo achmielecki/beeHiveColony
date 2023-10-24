@@ -15,7 +15,7 @@ class HiveGUI:
     def run(self):
         running = True
         while running:
-            time.sleep(0.1)
+            time.sleep(0.07)
             self.world.simulate()
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -41,12 +41,15 @@ class HiveGUI:
         for bee in hive.get_bees():
             if bee.behaviour.role == Role.scout:
                 pygame.draw.circle(self.screen, (204, 102, 0), (self.scale(bee.get_x()), self.scale(bee.get_y())), 3)
+            elif bee.behaviour.role == Role.employed_in_hive:
+                pass
             else:
                 pygame.draw.circle(self.screen, (0, 0, 255), (self.scale(bee.get_x()), self.scale(bee.get_y())), 3)
 
     def draw_food_sources(self, food_sources):
         for food_source in food_sources:
-            pygame.draw.rect(self.screen, (0, 255, 0),
+            if food_source.discovered:
+                pygame.draw.rect(self.screen, (0, 255, 0),
                              (self.scale(food_source.get_x()), self.scale(food_source.get_y()), 5, 5))
 
     def scale(self, x):

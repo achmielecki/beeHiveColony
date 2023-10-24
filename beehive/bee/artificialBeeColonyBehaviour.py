@@ -10,6 +10,7 @@ bee_nectar_max_carry = 0.06  # grams https://ucanr.edu/blogs/blogcore/postdetail
 bee_sight_range = 5  # m
 chance_of_becoming_scout = 0.001
 flower_max_nectar_carry = 0.007
+jiggle_effect_base_strength = 0.6
 
 
 # https://en.wikipedia.org/wiki/Artificial_bee_colony_algorithm
@@ -26,9 +27,13 @@ class ArtificialBeeColonyBehaviour:
         self.max_carry = bee_nectar_max_carry
         self.scout_steps = 0
         self.current_direction = 1 #angle in radians
+        self.acked_onlookers = 0
 
     def init_role(self):
-        return Role(2)
+        if np.random.rand() < 0.8:
+            return Role(4)
+        else:
+            return Role(2)
 
     def act(self):
         match self.role:
@@ -38,10 +43,12 @@ class ArtificialBeeColonyBehaviour:
                 self.onlook()
             case Role.scout:
                 self.scout()
+            case Role.employed_in_hive:
+                pass
 
     def onlook(self):
         self.stay_around_hive()
-        if self.are_there_any_dances():
+        if self.is_around_hive() and self.are_there_any_dances():
             self.my_food_source = self.choose_best_dance()
             self.role = Role.employed
         else:
@@ -52,10 +59,13 @@ class ArtificialBeeColonyBehaviour:
 
     def stay_around_hive(self):
         self.update_distance_to_hive()
-        if self.distance_to_hive > 1:
-            self.go_to_hive()
-        else:
+        if self.is_around_hive():
             self.float_around_hive()
+        else:
+            self.go_to_hive()
+
+    def is_around_hive(self):
+        return self.distance_to_hive < 0.5
 
     def update_distance_to_hive(self):
         self.distance_to_hive = self.calculate_distance_to_hive()
@@ -70,7 +80,8 @@ class ArtificialBeeColonyBehaviour:
         fx, fy = object.get_pos()
         dx = fx - self.bee.x
         dy = fy - self.bee.y
-        angle_radians = math.atan2(dy, dx)
+        jiggle_effect_strength = np.random.rand() - 0.5
+        angle_radians = math.atan2(dy, dx) + (jiggle_effect_base_strength * jiggle_effect_strength)
         distance = math.sqrt(dx*dx + dy*dy)
         if distance > self.speed:
             self.go_towards_direction(angle_radians, self.speed)
@@ -86,14 +97,17 @@ class ArtificialBeeColonyBehaviour:
     def choose_best_dance(self):
         dances = self.bee.hive.get_current_dances()
         dance = list(sorted(dances, key=lambda it: it[1].current_amount))[-1]
-        dance[0].stop_dance()
+        dance[0].ack_onlooker()
         return dance[1]
 
-    def stop_dance(self):
-        self.role = Role.onlooker
-        self.bee.hive.current_dances.remove((self, self.spotted_food))
-        self.spotted_food = None
-        self.bee.hive.current_scouts -= 1
+    def ack_onlooker(self):
+        self.acked_onlookers += 1
+        if self.acked_onlookers >= self.spotted_food.count_of_flowers - 1:
+            self.role = Role.employed
+            self.bee.hive.current_dances.remove((self, self.spotted_food))
+            self.my_food_source = self.spotted_food
+            self.spotted_food = None
+            self.bee.hive.current_scouts -= 1
 
     def harvest_your_food_source(self):
         if self.carried_nectar > 0:
@@ -156,6 +170,7 @@ class ArtificialBeeColonyBehaviour:
         foods = self.bee.hive.world.get_food_in_range(self.bee.x, self.bee.y, bee_sight_range)
         foods = list(filter(lambda it: it.current_amount > flower_max_nectar_carry, foods))
         if foods:
+            foods[0].spot()
             return foods[0]
         return None
 
@@ -175,3 +190,4 @@ class Role(Enum):
     employed = 1
     onlooker = 2
     scout = 3
+    employed_in_hive = 4

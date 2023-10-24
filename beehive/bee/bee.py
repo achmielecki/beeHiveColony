@@ -1,5 +1,3 @@
-import numpy as np
-from beehive.bee.beeFuzzyBehaviour import BeeFuzzyBehaviour
 from beehive.bee.artificialBeeColonyBehaviour import ArtificialBeeColonyBehaviour
 
 

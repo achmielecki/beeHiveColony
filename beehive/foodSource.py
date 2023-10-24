@@ -1,14 +1,27 @@
 import numpy as np
 
 flower_max_nectar_carry = 0.007  # grams https://royalsocietypublishing.org/doi/10.1098/rstb.2021.0163
+max_count_of_flowers_in_one_place = 30
+
 
 class FoodSource:
-    def __init__(self, x, y, max_amount=flower_max_nectar_carry*30*np.random.rand(), spawn_rate=0):
+    def __init__(
+            self,
+            x,
+            y,
+            max_amount=flower_max_nectar_carry * max_count_of_flowers_in_one_place * np.random.rand(),
+            spawn_rate=0
+    ):
+        self.count_of_flowers = max_count_of_flowers_in_one_place * np.random.rand()
         self.spawn_rate = spawn_rate
         self.x = x
         self.y = y
-        self.max_amount = max_amount
-        self.current_amount = np.random.rand() * max_amount
+        self.max_amount = flower_max_nectar_carry * self.count_of_flowers
+        self.current_amount = np.random.rand() * self.max_amount
+        self.discovered = False
+
+    def spot(self):
+        self.discovered = True
 
     def get_pos(self):
         return self.x, self.y
