@@ -89,6 +89,18 @@ class World:
         if self.time.second == 0:
             print(self.time)
 
+    def get_temp(self):
+        return 20
+
+    def get_tommorow_temp(self):
+        return 20
+
+    def get_rainfall(self):
+        return 0
+
+    def get_tomorrow_rainfall(self):
+        return 0
+
     def plot(self):
         x_hives = []
         y_hives = []

@@ -1,5 +1,6 @@
 import numpy as np
 
+from beehive.model_of_competition.model import ModelOfCompetition
 from beehive.bee.bee import Bee
 
 
@@ -24,6 +25,7 @@ class Hive:
         self.current_dances = []
         self.current_scouts = 0
         self.max_scouts = num_bees/2
+        self.nectar_goal = 0
 
     def spawn_bees(self, num_bees):
         for i in range(num_bees):
@@ -72,5 +74,16 @@ class Hive:
         return self.bees
 
     def simulate(self):
+        self.get_new_nectar_goal()
         for bee in self.bees:
             bee.act()
+
+    def get_new_nectar_goal(self):
+        model = ModelOfCompetition(
+            [self.world.get_temp(), self.world.get_tommorow_temp()],
+            [self.world.get_rainfall(), self.world.get_tomorrow_rainfall()],
+            len(self.bees),
+            1
+        )
+        model.simulation(False)
+        self.nectar_goal = model.get_foraged_nectar()
