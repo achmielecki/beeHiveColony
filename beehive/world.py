@@ -70,8 +70,8 @@ class World:
             Hive(
                 self,
                 self.num_bees_per_hive,
-                self.hives_area + np.random.rand() * (self.world_size - (self.hives_area * 2)),
-                self.hives_area + np.random.rand() * (self.world_size - (self.hives_area * 2)),
+                self.world_size / 2 + (self.world_size / 2 * (np.random.rand() - 0.5)),
+                self.world_size / 2 + (self.world_size / 2 * (np.random.rand() - 0.5)),
                 area_size=self.hives_area
             )
         )
@@ -79,7 +79,10 @@ class World:
     def simulate(self, num_iterations=1):
         for i in range(num_iterations):
             for hive in self.hives:
-                hive.simulate()
+                if self.time.second == 0 and self.time.hour == 0 and self.time.minute == 0:
+                    hive.simulate(True)
+                else:
+                    hive.simulate()
             for food in self.food_sources:
                 food.simulate()
         self.time_goes_forward()
@@ -87,7 +90,15 @@ class World:
     def time_goes_forward(self):
         self.time += datetime.timedelta(seconds=1)
         if self.time.second == 0:
-            print(self.time)
+            self.print_stuff()
+
+    def print_stuff(self):
+        print("===================")
+        print(self.time)
+        for hive in self.hives:
+            print("food: " + str(hive.nectar_stored))
+            print("today prognosed food: " + str(hive.nectar_goal))
+            print("difference: " + str(hive.nectar_stored - hive.nectar_goal))
 
     def get_temp(self):
         return 20
@@ -100,25 +111,3 @@ class World:
 
     def get_tomorrow_rainfall(self):
         return 0
-
-    def plot(self):
-        x_hives = []
-        y_hives = []
-        x_food_sources = []
-        y_food_sources = []
-        x_bees = []
-        y_bees = []
-        for hive in self.hives:
-            x_hives.append(hive.x)
-            x_bees = hive.get_bees_x_positions()
-            y_hives.append(hive.y)
-            y_bees = hive.get_bees_y_positions()
-        for food_source in self.food_sources:
-            x_food_sources.append(food_source.x)
-            y_food_sources.append(food_source.y)
-        plt.scatter(x_bees, y_bees, c='b', label='Bees')
-        plt.scatter(x_food_sources, y_food_sources, c='g', label='Food Sources')
-        plt.scatter(x_hives, y_hives, c='r', label="Hive")
-        plt.legend()
-        plt.show()
-        pass

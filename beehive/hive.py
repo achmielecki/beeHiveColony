@@ -24,7 +24,7 @@ class Hive:
         self.nectar_stored = 0
         self.current_dances = []
         self.current_scouts = 0
-        self.max_scouts = num_bees/2
+        self.max_scouts = num_bees / 2
         self.nectar_goal = 0
 
     def spawn_bees(self, num_bees):
@@ -73,8 +73,9 @@ class Hive:
     def get_bees(self):
         return self.bees
 
-    def simulate(self):
-        self.get_new_nectar_goal()
+    def simulate(self, is_new_day=False):
+        if is_new_day:
+            self.get_new_nectar_goal()
         for bee in self.bees:
             bee.act()
 
