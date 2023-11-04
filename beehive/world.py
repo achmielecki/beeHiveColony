@@ -31,7 +31,7 @@ class World:
         self.food_sources = []
         self.spawn_hives(num_hives)
         self.spawn_food(num_food_sources, world_size)
-        self.time = datetime.datetime(2000, 1, 1)
+        self.time = datetime.datetime(2000, 5, 1)
 
     def spawn_food(self, num_food_sources, world_size):
         for i in range(num_food_sources):
@@ -77,9 +77,12 @@ class World:
         )
 
     def simulate(self, num_iterations=1):
+        if self.is_it_dark():
+            self.time_goes_forward(600)
+            return
         for i in range(num_iterations):
             for hive in self.hives:
-                if self.time.second == 0 and self.time.hour == 0 and self.time.minute == 0:
+                if self.is_it_beginning_of_the_day():
                     hive.simulate(True)
                 else:
                     hive.simulate()
@@ -87,8 +90,8 @@ class World:
                 food.simulate()
         self.time_goes_forward()
 
-    def time_goes_forward(self):
-        self.time += datetime.timedelta(seconds=1)
+    def time_goes_forward(self, seconds=1):
+        self.time += datetime.timedelta(seconds=seconds)
         if self.time.second == 0:
             self.print_stuff()
 
@@ -111,3 +114,9 @@ class World:
 
     def get_tomorrow_rainfall(self):
         return 0
+
+    def is_it_beginning_of_the_day(self):
+        return self.time.second == 0 and self.time.hour == 5 and self.time.minute == 0
+
+    def is_it_dark(self):
+        return self.time.hour < 5 or self.time.hour > 20

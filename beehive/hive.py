@@ -24,7 +24,7 @@ class Hive:
         self.nectar_stored = 0
         self.current_dances = []
         self.current_scouts = 0
-        self.max_scouts = num_bees / 2
+        self.max_scouts = self.num_bees * 0.1
         self.nectar_goal = 0
 
     def spawn_bees(self, num_bees):
@@ -83,7 +83,7 @@ class Hive:
         model = ModelOfCompetition(
             [self.world.get_temp(), self.world.get_tommorow_temp()],
             [self.world.get_rainfall(), self.world.get_tomorrow_rainfall()],
-            len(self.bees),
+            len(self.bees)*10,
             1
         )
         model.simulation(False)

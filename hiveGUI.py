@@ -43,6 +43,8 @@ class HiveGUI:
                 pygame.draw.circle(self.screen, (204, 102, 0), (self.scale(bee.get_x()), self.scale(bee.get_y())), 3)
             elif bee.behaviour.role == Role.employed_in_hive:
                 pass
+            elif bee.behaviour.is_dancing:
+                pygame.draw.circle(self.screen, (255, 0, 0), (self.scale(bee.get_x()), self.scale(bee.get_y())), 3)
             else:
                 pygame.draw.circle(self.screen, (0, 0, 255), (self.scale(bee.get_x()), self.scale(bee.get_y())), 3)
 

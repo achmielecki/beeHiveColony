@@ -26,7 +26,7 @@ class ArtificialBeeColonyBehaviour:
         self.carried_nectar = 0
         self.max_carry = bee_nectar_max_carry
         self.scout_steps = 0
-        self.current_direction = 1 #angle in radians
+        self.current_direction = 1  # angle in radians
         self.acked_onlookers = 0
 
     def init_role(self):
@@ -43,19 +43,32 @@ class ArtificialBeeColonyBehaviour:
                 self.onlook()
             case Role.scout:
                 self.scout()
-            case Role.employed_in_hive:
-                pass
 
     def onlook(self):
         self.stay_around_hive()
         if self.is_around_hive() and self.are_there_any_dances():
-            self.my_food_source = self.choose_best_dance()
-            self.role = Role.employed
+            self.get_employed_at_best_food_source()
         else:
-            if np.random.rand() < chance_of_becoming_scout:
-                if self.bee.hive.current_scouts < self.bee.hive.max_scouts:
-                    self.bee.hive.current_scouts += 1
-                    self.role = Role.scout
+            if self.should_become_scout():
+                self.become_scout()
+
+    def get_employed_at_best_food_source(self):
+        self.my_food_source = self.choose_best_dance()
+        self.role = Role.employed
+
+    def should_become_scout(self):
+        return np.random.rand() < self.chance_of_becoming_scout()
+
+    def chance_of_becoming_scout(self):
+        if self.bee.hive.current_scouts >= self.bee.hive.max_scouts:
+            return 0
+        if self.bee.hive.world.is_it_dark():
+            return 0
+        return chance_of_becoming_scout
+
+    def become_scout(self):
+        self.bee.hive.current_scouts += 1
+        self.role = Role.scout
 
     def stay_around_hive(self):
         self.update_distance_to_hive()
@@ -65,7 +78,7 @@ class ArtificialBeeColonyBehaviour:
             self.go_to_hive()
 
     def is_around_hive(self):
-        return self.distance_to_hive < 0.5
+        return self.distance_to_hive < 0.05
 
     def update_distance_to_hive(self):
         self.distance_to_hive = self.calculate_distance_to_hive()
@@ -82,7 +95,7 @@ class ArtificialBeeColonyBehaviour:
         dy = fy - self.bee.y
         jiggle_effect_strength = np.random.rand() - 0.5
         angle_radians = math.atan2(dy, dx) + (jiggle_effect_base_strength * jiggle_effect_strength)
-        distance = math.sqrt(dx*dx + dy*dy)
+        distance = math.sqrt(dx * dx + dy * dy)
         if distance > self.speed:
             self.go_towards_direction(angle_radians, self.speed)
         else:
@@ -108,24 +121,29 @@ class ArtificialBeeColonyBehaviour:
             self.my_food_source = self.spotted_food
             self.spotted_food = None
             self.bee.hive.current_scouts -= 1
+            self.acked_onlookers = 0
+            self.is_dancing = False
 
     def harvest_your_food_source(self):
-        if self.carried_nectar > 0:
+        if self.should_leave_nectar_in_hive():
             self.update_distance_to_hive()
-            if self.distance_to_hive > 0.05:
+            if not self.is_around_hive():
                 self.go_to_hive()
             else:
                 self.leave_food_in_hive()
+            return
         if self.my_food_source is None:
             self.role = Role(2)
         else:
-            if self.carried_nectar == 0:
-                if self.distance_to_your_food() > 0.05:
-                    self.go_to_your_food_source()
-                else:
-                    self.harvest()
-                    if self.my_food_is_not_efficient_anymore():
-                        self.abandon_my_food_source()
+            if self.distance_to_your_food() > 0.05:
+                self.go_to_your_food_source()
+            else:
+                self.harvest()
+                if self.my_food_is_not_efficient_anymore():
+                    self.abandon_my_food_source()
+
+    def should_leave_nectar_in_hive(self):
+        return self.carried_nectar > self.max_carry * 0.8 or (self.carried_nectar > 0 and self.my_food_source is None)
 
     def distance_to_your_food(self) -> float:
         return np.sqrt((self.my_food_source.x - self.bee.x) ** 2 + (self.my_food_source.y - self.bee.y) ** 2)
@@ -134,7 +152,8 @@ class ArtificialBeeColonyBehaviour:
         self.go_towards_object(self.my_food_source)
 
     def harvest(self):
-        self.carried_nectar = self.my_food_source.extract_food(self.max_carry)
+        amount_that_can_be_harvested = min(self.max_carry / 4, self.max_carry-self.carried_nectar)
+        self.carried_nectar = self.my_food_source.extract_food(amount_that_can_be_harvested)
 
     def my_food_is_not_efficient_anymore(self):
         return self.my_food_source.current_amount < self.max_carry
@@ -151,7 +170,7 @@ class ArtificialBeeColonyBehaviour:
             return
         if self.spotted_food:
             self.update_distance_to_hive()
-            if self.distance_to_hive < 0.05:
+            if self.is_around_hive():
                 self.dance()
             else:
                 self.go_to_hive()
