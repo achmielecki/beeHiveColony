@@ -1,16 +1,8 @@
 from enum import Enum
+import beehive.bee.Logic.goForFood as gff
 import numpy as np
 import math
-
-bee_max_speed = 8.2  # m/s
-bee_min_speed = 4.9  # m/s
-max_life_time = 10  # days
-min_life_time = 5  # days
-bee_nectar_max_carry = 0.06  # grams https://ucanr.edu/blogs/blogcore/postdetail.cfm?postnum=43385
-bee_sight_range = 5  # m
-chance_of_becoming_scout = 0.001
-flower_max_nectar_carry = 0.007
-jiggle_effect_base_strength = 0.6
+from beehive.constVariables import *
 
 
 # https://en.wikipedia.org/wiki/Artificial_bee_colony_algorithm
@@ -18,6 +10,7 @@ class ArtificialBeeColonyBehaviour:
     def __init__(self, bee):
         self.is_dancing = False
         self.spotted_food = None
+        self.overall_food_quality = None
         self.distance_to_hive = None
         self.speed = bee_min_speed + ((bee_max_speed - bee_min_speed) * np.random.rand())
         self.my_food_source = None
@@ -28,6 +21,7 @@ class ArtificialBeeColonyBehaviour:
         self.scout_steps = 0
         self.current_direction = 1  # angle in radians
         self.acked_onlookers = 0
+        self.dance_intensity = gff.GoForFood()
 
     def init_role(self):
         if np.random.rand() < 0.8:
@@ -81,10 +75,7 @@ class ArtificialBeeColonyBehaviour:
         return self.distance_to_hive < 0.05
 
     def update_distance_to_hive(self):
-        self.distance_to_hive = self.calculate_distance_to_hive()
-
-    def calculate_distance_to_hive(self) -> float:
-        return np.sqrt((self.bee.x - self.bee.hive.x) ** 2 + (self.bee.y - self.bee.hive.y) ** 2)
+        self.distance_to_hive = self.get_distance(self.bee.x, self.bee.y, self.bee.hive.x, self.bee.hive.y)
 
     def go_to_hive(self):
         self.go_towards_object(self.bee.hive)
@@ -109,7 +100,9 @@ class ArtificialBeeColonyBehaviour:
 
     def choose_best_dance(self):
         dances = self.bee.hive.get_current_dances()
-        dance = list(sorted(dances, key=lambda it: it[1].current_amount))[-1]
+        if len(dances) >= 2:
+            print('more than 2 dances')
+        dance = list(sorted(dances, key=lambda it: it[2]))[-1]
         dance[0].ack_onlooker()
         return dance[1]
 
@@ -117,7 +110,7 @@ class ArtificialBeeColonyBehaviour:
         self.acked_onlookers += 1
         if self.acked_onlookers >= self.spotted_food.count_of_flowers - 1:
             self.role = Role.employed
-            self.bee.hive.current_dances.remove((self, self.spotted_food))
+            self.bee.hive.current_dances.remove((self, self.spotted_food, self.overall_food_quality))
             self.my_food_source = self.spotted_food
             self.spotted_food = None
             self.bee.hive.current_scouts -= 1
@@ -195,7 +188,11 @@ class ArtificialBeeColonyBehaviour:
 
     def dance(self):
         self.is_dancing = True
-        self.bee.hive.current_dances.append((self, self.spotted_food))
+        food_distance_form_hive = self.get_distance(self.bee.hive.x, self.spotted_food.x,
+                                                    self.bee.hive.y, self.spotted_food.y)
+        self.overall_food_quality = self.dance_intensity.set_dance_intensity(
+            food_distance_form_hive, self.spotted_food.count_of_flowers)
+        self.bee.hive.current_dances.append((self, self.spotted_food, self.overall_food_quality))
 
     def random_direction(self):
         self.current_direction = math.pi * 2 * np.random.rand()
@@ -203,6 +200,9 @@ class ArtificialBeeColonyBehaviour:
     def go_towards_direction(self, direction, speed):
         self.bee.x += math.cos(direction) * speed
         self.bee.y += math.sin(direction) * speed
+
+    def get_distance(self, x1, y1, x2, y2) -> float:
+        return math.sqrt((x1 - x2) ** 2 + (y1 - y2) ** 2)
 
 
 class Role(Enum):

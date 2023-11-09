@@ -1,7 +1,5 @@
 import numpy as np
-
-flower_max_nectar_carry = 0.007  # grams https://royalsocietypublishing.org/doi/10.1098/rstb.2021.0163
-max_count_of_flowers_in_one_place = 30
+from beehive.constVariables import *
 
 
 class FoodSource:
