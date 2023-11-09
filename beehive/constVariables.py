@@ -8,4 +8,4 @@ chance_of_becoming_scout = 0.001
 flower_max_nectar_carry = 0.007
 jiggle_effect_base_strength = 0.6
 max_count_of_flowers_in_one_place = 30
-world_size=2000
+world_size = 2000

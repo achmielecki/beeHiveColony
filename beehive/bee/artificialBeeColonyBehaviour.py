@@ -100,8 +100,6 @@ class ArtificialBeeColonyBehaviour:
 
     def choose_best_dance(self):
         dances = self.bee.hive.get_current_dances()
-        if len(dances) >= 2:
-            print('more than 2 dances')
         dance = list(sorted(dances, key=lambda it: it[2]))[-1]
         dance[0].ack_onlooker()
         return dance[1]
@@ -188,10 +186,10 @@ class ArtificialBeeColonyBehaviour:
 
     def dance(self):
         self.is_dancing = True
-        food_distance_form_hive = self.get_distance(self.bee.hive.x, self.spotted_food.x,
+        food_distance_from_hive = self.get_distance(self.bee.hive.x, self.spotted_food.x,
                                                     self.bee.hive.y, self.spotted_food.y)
         self.overall_food_quality = self.dance_intensity.set_dance_intensity(
-            food_distance_form_hive, self.spotted_food.count_of_flowers)
+            food_distance_from_hive, self.spotted_food.count_of_flowers)
         self.bee.hive.current_dances.append((self, self.spotted_food, self.overall_food_quality))
 
     def random_direction(self):
