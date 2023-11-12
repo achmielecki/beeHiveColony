@@ -1,6 +1,6 @@
 import time
 import pygame
-from beehive.bee.artificialBeeColonyBehaviour import Role
+from beehive.bee.artificialBeeColonyBehaviour import Role, bee_nectar_max_carry
 
 
 class HiveGUI:
@@ -51,8 +51,12 @@ class HiveGUI:
     def draw_food_sources(self, food_sources):
         for food_source in food_sources:
             if food_source.discovered:
-                pygame.draw.rect(self.screen, (0, 255, 0),
-                             (self.scale(food_source.get_x()), self.scale(food_source.get_y()), 5, 5))
+                if food_source.current_amount >= bee_nectar_max_carry:
+                    pygame.draw.rect(self.screen, (0, 255, 0),
+                                     (self.scale(food_source.get_x()), self.scale(food_source.get_y()), 5, 5))
+                else:
+                    pygame.draw.rect(self.screen, (255, 165, 0),
+                                     (self.scale(food_source.get_x()), self.scale(food_source.get_y()), 5, 5))
 
     def scale(self, x):
         return self.ratio * x

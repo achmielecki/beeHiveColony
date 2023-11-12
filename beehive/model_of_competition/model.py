@@ -175,3 +175,4 @@ class ModelOfCompetition:
 
     def create_csv_from_df(self, name, df):
         df.to_csv(name, encoding='utf-8')
+
