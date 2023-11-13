@@ -106,7 +106,7 @@ class ArtificialBeeColonyBehaviour:
 
     def ack_onlooker(self):
         self.acked_onlookers += 1
-        if self.acked_onlookers >= self.spotted_food.count_of_flowers - 1:
+        if self.acked_onlookers >= (self.spotted_food.current_amount/self.max_carry) - 1:
             self.role = Role.employed
             self.bee.hive.current_dances.remove((self, self.spotted_food, self.overall_food_quality))
             self.my_food_source = self.spotted_food
@@ -143,7 +143,7 @@ class ArtificialBeeColonyBehaviour:
         self.go_towards_object(self.my_food_source)
 
     def harvest(self):
-        amount_that_can_be_harvested = min(self.max_carry / 4, self.max_carry-self.carried_nectar)
+        amount_that_can_be_harvested = min(self.max_carry / 4, self.max_carry - self.carried_nectar)
         self.carried_nectar = self.my_food_source.extract_food(amount_that_can_be_harvested)
 
     def my_food_is_not_efficient_anymore(self):
@@ -178,7 +178,7 @@ class ArtificialBeeColonyBehaviour:
 
     def spot_food(self):
         foods = self.bee.hive.world.get_food_in_range(self.bee.x, self.bee.y, bee_sight_range)
-        foods = list(filter(lambda it: it.current_amount > flower_max_nectar_carry, foods))
+        foods = list(filter(lambda it: it.current_amount > flower_max_nectar_carry and it.discovered is False, foods))
         if foods:
             foods[0].spot()
             return foods[0]
