@@ -22,6 +22,7 @@ class World:
             world_size=2000,
             hives_area=15
     ):
+        self.time = datetime.datetime(2000, 5, 1)
         self.num_hives = num_hives
         self.num_bees_per_hive = num_bees_per_hive
         self.num_food_sources = num_food_sources
@@ -31,7 +32,6 @@ class World:
         self.food_sources = []
         self.spawn_hives(num_hives)
         self.spawn_food(num_food_sources, world_size)
-        self.time = datetime.datetime(2000, 5, 1)
 
     def spawn_food(self, num_food_sources, world_size):
         for i in range(num_food_sources):
@@ -99,6 +99,8 @@ class World:
         print("===================")
         print(self.time)
         for hive in self.hives:
+            print("bees: " + str(len(hive.bees)))
+            print("dead_bees: " + str(hive.dead_bees))
             print("food: " + str(hive.nectar_stored))
             print("today prognosed food: " + str(hive.nectar_goal))
             print("difference: " + str(hive.nectar_stored - hive.nectar_goal))
@@ -120,3 +122,6 @@ class World:
 
     def is_it_dark(self):
         return self.time.hour < 5 or self.time.hour > 20
+
+    def get_time(self):
+        return self.time

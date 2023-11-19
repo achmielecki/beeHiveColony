@@ -1,3 +1,5 @@
+import datetime
+
 import numpy as np
 
 from beehive.model_of_competition.model import ModelOfCompetition
@@ -20,14 +22,15 @@ class Hive:
         self.y = y
         self.area_size = area_size
         self.bees = []
-        self.spawn_bees(num_bees)
+        self.spawn_initial_bees(num_bees)
         self.nectar_stored = 0
         self.current_dances = []
         self.current_scouts = 0
         self.max_scouts = self.num_bees * 0.1
         self.nectar_goal = 0
+        self.dead_bees = 0
 
-    def spawn_bees(self, num_bees):
+    def spawn_initial_bees(self, num_bees):
         for i in range(num_bees):
             self.spawn_bee()
 
@@ -39,7 +42,8 @@ class Hive:
             Bee(
                 self,
                 self.x + np.random.rand() * self.area_size,
-                self.y + np.random.rand() * self.area_size
+                self.y + np.random.rand() * self.area_size,
+                self.world.get_time() - datetime.timedelta(seconds=(3110400 * np.random.rand()))
             )
         )
 
@@ -73,6 +77,10 @@ class Hive:
     def get_bees(self):
         return self.bees
 
+    def remove_dead_bee(self, bee):
+        self.bees.remove(next((x for x in self.bees if x.id == bee.id), None))
+        self.dead_bees += 1
+
     def simulate(self, is_new_day=False):
         if is_new_day:
             self.get_new_nectar_goal()
@@ -83,7 +91,7 @@ class Hive:
         model = ModelOfCompetition(
             [self.world.get_temp(), self.world.get_tommorow_temp()],
             [self.world.get_rainfall(), self.world.get_tomorrow_rainfall()],
-            len(self.bees)*10,
+            len(self.bees) * 10,
             1
         )
         model.simulation(False)

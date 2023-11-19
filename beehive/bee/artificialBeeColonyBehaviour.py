@@ -1,3 +1,4 @@
+import datetime
 from enum import Enum
 import beehive.bee.Logic.goForFood as gff
 import numpy as np
@@ -30,6 +31,8 @@ class ArtificialBeeColonyBehaviour:
             return Role(2)
 
     def act(self):
+        if self.is_too_old():
+            self.die()
         match self.role:
             case Role.employed:
                 self.harvest_your_food_source()
@@ -37,6 +40,13 @@ class ArtificialBeeColonyBehaviour:
                 self.onlook()
             case Role.scout:
                 self.scout()
+
+    def is_too_old(self):
+        return self.bee.get_age() > datetime.timedelta(days=36) - (0.5 - np.random.rand()) * datetime.timedelta(
+            hours=48)
+
+    def die(self):
+        self.bee.hive.remove_dead_bee(self.bee)
 
     def onlook(self):
         self.stay_around_hive()
@@ -106,7 +116,7 @@ class ArtificialBeeColonyBehaviour:
 
     def ack_onlooker(self):
         self.acked_onlookers += 1
-        if self.acked_onlookers >= (self.spotted_food.current_amount/self.max_carry) - 1:
+        if self.acked_onlookers >= (self.spotted_food.current_amount / self.max_carry) - 1:
             self.role = Role.employed
             self.bee.hive.current_dances.remove((self, self.spotted_food, self.overall_food_quality))
             self.my_food_source = self.spotted_food
