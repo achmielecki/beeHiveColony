@@ -9,3 +9,5 @@ flower_max_nectar_carry = 0.007
 jiggle_effect_base_strength = 0.6
 max_count_of_flowers_in_one_place = 30
 world_size = 2000
+daily_bee_spawn_rate = 1000
+flower_nectar_respawn_rate = 0.0005
