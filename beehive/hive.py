@@ -4,6 +4,7 @@ import numpy as np
 
 from beehive.model_of_competition.model import ModelOfCompetition
 from beehive.bee.bee import Bee
+from beehive.constVariables import *
 
 
 class Hive:
@@ -22,7 +23,7 @@ class Hive:
         self.y = y
         self.area_size = area_size
         self.bees = []
-        self.spawn_initial_bees(num_bees)
+        self.spawn_bees(num_bees)
         self.nectar_stored = 0
         self.current_dances = []
         self.current_scouts = 0
@@ -30,7 +31,7 @@ class Hive:
         self.nectar_goal = 0
         self.dead_bees = 0
 
-    def spawn_initial_bees(self, num_bees):
+    def spawn_bees(self, num_bees):
         for i in range(num_bees):
             self.spawn_bee()
 
@@ -83,9 +84,13 @@ class Hive:
 
     def simulate(self, is_new_day=False):
         if is_new_day:
+            self.spawn_daily_bees_born_rate()
             self.get_new_nectar_goal()
         for bee in self.bees:
             bee.act()
+
+    def spawn_daily_bees_born_rate(self):
+        self.spawn_bees(daily_bee_spawn_rate)
 
     def get_new_nectar_goal(self):
         model = ModelOfCompetition(

@@ -5,6 +5,7 @@ import numpy as np
 import math
 from beehive.constVariables import *
 
+dance_intensity_model = gff.GoForFood()
 
 # https://en.wikipedia.org/wiki/Artificial_bee_colony_algorithm
 class ArtificialBeeColonyBehaviour:
@@ -22,7 +23,7 @@ class ArtificialBeeColonyBehaviour:
         self.scout_steps = 0
         self.current_direction = 1  # angle in radians
         self.acked_onlookers = 0
-        self.dance_intensity = gff.GoForFood()
+        self.dance_intensity = dance_intensity_model
 
     def init_role(self):
         if np.random.rand() < 0.8:
