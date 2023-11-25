@@ -119,3 +119,9 @@ class World:
 
     def get_time(self):
         return self.time
+
+    def get_global_nectar_value(self):
+        qd1 = 0
+        for source in self.food_sources:
+            qd1 += source.current_amount
+        return qd1

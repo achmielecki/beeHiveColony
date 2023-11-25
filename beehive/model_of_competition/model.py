@@ -4,12 +4,12 @@ import random
 
 
 class ModelOfCompetition:
-    def __init__(self, temperature, rainfall, forager_count, num_bee_families):
+    def __init__(self, temperature, rainfall, forager_count, num_bee_families, qd1):
         self.num_bee_families = num_bee_families
         self.ALPHA = 0.015
         self.BETA = 0.015
         self.simulation_duration = len(temperature)
-        self.QD1 = 10.0
+        self.QD1 = qd1
         self.QD2 = 2.0
         self.forager_count = forager_count
         self.probability_of_finding = [0.25, 0.5, 0.750, 1.0]
