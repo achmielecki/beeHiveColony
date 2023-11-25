@@ -12,7 +12,6 @@ class ModelOfCompetition:
         self.QD1 = 10.0
         self.QD2 = 2.0
         self.forager_count = forager_count
-
         self.probability_of_finding = [0.25, 0.5, 0.750, 1.0]
 
         self.nectar_foragers = np.zeros((self.num_bee_families, self.simulation_duration), dtype=float)
@@ -69,10 +68,10 @@ class ModelOfCompetition:
         return self.PD(k) * self.PT(k)
 
     def W1(self, i, k):
-        return 40.0
+        return self.forager_count
 
     def W2(self, i, k):
-        return 10.0
+        return self.forager_count
 
     def L(self, k):
         return 10.0
@@ -169,10 +168,8 @@ class ModelOfCompetition:
         nectar = []
 
         for t in range(len(self.probability_of_finding)):
-            for i in range(self.num_bee_families):
-                nectar.append(self.sum_U1[t][i])
+            nectar.append(self.sum_U1[t][0])
         return sum(nectar)
 
     def create_csv_from_df(self, name, df):
         df.to_csv(name, encoding='utf-8')
-
