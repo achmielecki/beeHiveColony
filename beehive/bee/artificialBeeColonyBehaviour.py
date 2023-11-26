@@ -7,6 +7,7 @@ from beehive.constVariables import *
 
 dance_intensity_model = gff.GoForFood()
 
+
 # https://en.wikipedia.org/wiki/Artificial_bee_colony_algorithm
 class ArtificialBeeColonyBehaviour:
     def __init__(self, bee):
