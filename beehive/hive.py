@@ -94,10 +94,11 @@ class Hive:
 
     def get_new_nectar_goal(self):
         model = ModelOfCompetition(
-            [self.world.get_temp(), self.world.get_tommorow_temp()],
-            [self.world.get_rainfall(), self.world.get_tomorrow_rainfall()],
-            len(self.bees) * 10,
-            1
+            self.world.get_week_temps(),
+            self.world.get_week_rainfall(),
+            len(self.bees),
+            4,
+            self.world.get_global_nectar_value()
         )
         model.simulation(False)
         self.nectar_goal = model.get_foraged_nectar()

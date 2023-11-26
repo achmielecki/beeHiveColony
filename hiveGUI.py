@@ -15,7 +15,6 @@ class HiveGUI:
     def run(self):
         running = True
         while running:
-            #time.sleep(0.07)
             self.world.simulate()
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:

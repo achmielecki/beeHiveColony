@@ -105,17 +105,11 @@ class World:
             print("today prognosed food: " + str(hive.nectar_goal))
             print("difference: " + str(hive.nectar_stored - hive.nectar_goal))
 
-    def get_temp(self):
-        return 20
+    def get_week_temps(self):
+        return [20, 20, 20, 20, 20, 20, 20]
 
-    def get_tommorow_temp(self):
-        return 20
-
-    def get_rainfall(self):
-        return 0
-
-    def get_tomorrow_rainfall(self):
-        return 0
+    def get_week_rainfall(self):
+        return [0, 0, 0, 0, 0, 0, 0]
 
     def is_it_beginning_of_the_day(self):
         return self.time.second == 0 and self.time.hour == 5 and self.time.minute == 0
@@ -125,3 +119,9 @@ class World:
 
     def get_time(self):
         return self.time
+
+    def get_global_nectar_value(self):
+        qd1 = 0
+        for source in self.food_sources:
+            qd1 += source.current_amount
+        return qd1
