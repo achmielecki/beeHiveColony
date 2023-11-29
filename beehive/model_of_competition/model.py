@@ -4,6 +4,7 @@ import random
 
 from beehive.constVariables import *
 
+
 class ModelOfCompetition:
     def __init__(self, temperature, rainfall, forager_count, num_bee_families, qd1):
         self.num_bee_families = num_bee_families
@@ -78,11 +79,13 @@ class ModelOfCompetition:
         return 10.0
 
     def get_nectar_mass_of_family_in_day(self, i, k):
-        return self.ALPHA * self.get_number_of_flights_per_bee(k) * self.environmental_conditions[k] * self.nectar_foragers[i, k] * \
+        return self.ALPHA * self.get_number_of_flights_per_bee(k) * self.environmental_conditions[k] * \
+            self.nectar_foragers[i, k] * \
             self.information_variable[i, k]
 
     def get_pollen_mass_of_family_in_day(self, i, k):
-        return self.BETA * self.get_number_of_flights_per_bee(k) * self.environmental_conditions[k] * self.pollen_foragers[i, k] * \
+        return self.BETA * self.get_number_of_flights_per_bee(k) * self.environmental_conditions[k] * \
+            self.pollen_foragers[i, k] * \
             self.information_variable[i, k]
 
     def RAND(self):
@@ -170,7 +173,7 @@ class ModelOfCompetition:
 
         for t in range(len(self.probability_of_finding)):
             nectar.append(self.sum_U1[t][0])
-        return sum(nectar)
+        return sum(nectar)/self.simulation_duration
 
     def create_csv_from_df(self, name, df):
         df.to_csv(name, encoding='utf-8')

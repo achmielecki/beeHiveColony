@@ -12,10 +12,9 @@ world_size = 2000
 daily_bee_spawn_rate = 50
 flower_nectar_respawn_rate = 0.0005
 
-
 #### variables for model of competition
 
-MOC_ALPHA = 0.015 #Masa nektaru przynoszona w jednym locie przez 103 pszczoły zbieraczki nektaru
-MOC_BETA = 0.015 #Masa pyłku kwiatowego w jednym locie przez 103 pszczoły zbieraczki pyłku kwiatowego
+MOC_ALPHA = bee_nectar_max_carry * 0.6  # Masa nektaru przynoszona w jednym locie przez 1 pszczołe zbieraczke nektaru
+MOC_BETA = 0.015  # Masa pyłku kwiatowego w jednym locie przez 1 pszczołe zbieraczke pyłku kwiatowego
 MOC_QD2 = 2
 MOC_PROBABILITY_OF_FINDING = [0.25, 0.5, 0.750, 1.0]
