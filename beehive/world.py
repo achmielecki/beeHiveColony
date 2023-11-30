@@ -1,6 +1,6 @@
-import matplotlib.pyplot as plt
-import numpy as np
 import datetime
+
+import numpy as np
 
 from beehive.foodSource import FoodSource
 from beehive.hive import Hive
@@ -88,12 +88,12 @@ class World:
                     hive.simulate()
             for food in self.food_sources:
                 food.simulate()
+        if self.time.second == 0:
+            self.print_stuff()
         self.time_goes_forward()
 
     def time_goes_forward(self, seconds=1):
         self.time += datetime.timedelta(seconds=seconds)
-        if self.time.second == 0:
-            self.print_stuff()
 
     def print_stuff(self):
         print("===================")
@@ -101,15 +101,18 @@ class World:
         for hive in self.hives:
             print("bees: " + str(len(hive.bees)))
             print("dead_bees: " + str(hive.dead_bees))
-            print("food: " + str(hive.nectar_stored))
-            print("today prognosed food: " + str(hive.nectar_goal))
+            print("nectar: " + str(hive.nectar_stored))
+            print("today prognosed nectar: " + str(hive.nectar_goal))
             print("difference: " + str(hive.nectar_stored - hive.nectar_goal))
+            print("global nectar value: " + str(self.get_global_nectar_value()))
+            print("temperature for week: " + str(self.get_week_temps()))
+            print("rainfall for week: " + str(self.get_week_rainfall()))
 
     def get_week_temps(self):
-        return [20, 20, 20, 20, 20, 20, 20]
+        return [23.9, 17.2, 12.8, 12.8, 13.9, 15.0, 16.1]
 
     def get_week_rainfall(self):
-        return [0, 0, 0, 0, 0, 0, 0]
+        return [0.0, 0.0, 1.0, 0.5, 0.0, 0.0, 0.3]
 
     def is_it_beginning_of_the_day(self):
         return self.time.second == 0 and self.time.hour == 5 and self.time.minute == 0

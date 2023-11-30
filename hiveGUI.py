@@ -1,5 +1,5 @@
-import time
 import pygame
+
 from beehive.bee.artificialBeeColonyBehaviour import Role, bee_nectar_max_carry
 
 
@@ -19,12 +19,9 @@ class HiveGUI:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     running = False
-
             self.screen.fill((255, 255, 255))
             self.draw_world()
-
             pygame.display.flip()
-
         pygame.quit()
 
     def draw_world(self):
