@@ -6,36 +6,20 @@ import numpy as np
 import math
 from beehive.constVariables import *
 
-dance_intensity_model = gff.GoForFood()
+
 # go_out_model = lh.LeaveHive()
 
 
 # https://en.wikipedia.org/wiki/Artificial_bee_colony_algorithm
 class ArtificialBeeColonyBehaviour:
     def __init__(self, bee):
-        self.is_dancing = False
-        self.spotted_food = None
-        self.overall_food_quality = None
-        self.distance_to_hive = None
         self.speed = bee_min_speed + ((bee_max_speed - bee_min_speed) * np.random.rand())
-        self.my_food_source = None
         self.bee = bee
-        self.carried_nectar = 0
         self.max_carry = bee_nectar_max_carry
-        self.scout_steps = 0
-        self.current_direction = 1  # angle in radians
-        self.acked_onlookers = 0
-        self.dance_intensity = dance_intensity_model
-
-    def act(self):
-        if self.is_too_old():
-            self.die()
-        else:
-            self.bee.role.act()  # not implemented
 
     def is_too_old(self):
-        return self.bee.get_age() > datetime.timedelta(days=36) - (0.5 - np.random.rand()) * datetime.timedelta(
-            hours=48)
+        return self.bee.get_age() > datetime.timedelta(days=max_life_time) - (0.5 - np.random.rand()) * datetime.timedelta(
+            hours=max_life_time_deviation)
 
     def die(self):
         self.bee.hive.remove_dead_bee(self.bee)
@@ -48,10 +32,10 @@ class ArtificialBeeColonyBehaviour:
             self.go_to_hive()
 
     def is_around_hive(self):
-        return self.distance_to_hive < 0.05
+        return self.bee.distance_to_hive < 0.05
 
     def update_distance_to_hive(self):
-        self.distance_to_hive = self.get_distance(self.bee.x, self.bee.y, self.bee.hive.x, self.bee.hive.y)
+        self.bee.distance_to_hive = self.get_distance(self.bee.x, self.bee.y, self.bee.hive.x, self.bee.hive.y)
 
     def go_to_hive(self):
         self.go_towards_object(self.bee.hive)
@@ -72,7 +56,7 @@ class ArtificialBeeColonyBehaviour:
         pass
 
     def distance_to_your_food(self) -> float:
-        return self.get_distance(self.my_food_source.x, self.my_food_source.y, self.bee.x, self.bee.y)
+        return self.get_distance(self.bee.my_food_source.x, self.bee.my_food_source.y, self.bee.x, self.bee.y)
 
     def go_towards_direction(self, direction, speed):
         self.bee.x += math.cos(direction) * speed

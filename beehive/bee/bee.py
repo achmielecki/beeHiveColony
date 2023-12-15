@@ -2,8 +2,11 @@ from beehive.bee.artificialBeeColonyBehaviour import Role
 from beehive.bee.Roles.employed import Employed
 from beehive.bee.Roles.scout import Scout
 from beehive.bee.Roles.onlooker import Onlooker
+import beehive.bee.Logic.goForFood as gff
 import numpy as np
 import uuid
+
+dance_intensity_model = gff.GoForFood()
 
 
 class Bee:
@@ -19,16 +22,27 @@ class Bee:
         self.x = x
         self.y = y
         self.born_time = born_time
-        self.role = self.init_role()
-        self.role_tag = None
+        self.role_tag, self.role = self.init_role()
+        self.scout_steps = 0
+        self.current_direction = 1  # angle in radians
+        self.acked_onlookers = 0
+        self.dance_intensity = dance_intensity_model
+        self.carried_nectar = 0
+        self.is_dancing = False
+        self.spotted_food = None
+        self.overall_food_quality = None
+        self.distance_to_hive = None
+        self.my_food_source = None
 
     def init_role(self):
         if np.random.rand() < 0.8:
-            self.role_tag = Role.scout
-            return Scout(self)
+            # self.role_tag = Role.scout
+            # return Scout(self)
+            return Role.onlooker, Onlooker(self)
         else:
-            self.role_tag = Role.onlooker
-            return Onlooker(self)
+            # self.role_tag = Role.onlooker
+            # return Onlooker(self)
+            return Role.scout, Scout(self)
 
     def become_onlooker(self):
         self.role = Onlooker(self)
@@ -43,7 +57,12 @@ class Bee:
         self.role_tag = Role.scout
 
     def act(self):
-        self.role.act()
+        try:
+            if self.role.is_too_old():
+                self.role.die()
+            self.role.act()
+        except AttributeError:
+            self.role = Onlooker(self)
 
     def get_x(self) -> float:
         return self.x

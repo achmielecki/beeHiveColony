@@ -10,9 +10,9 @@ class Scout(ArtificialBeeColonyBehaviour):
         self.bee = bee
 
     def act(self):
-        if self.is_dancing:
+        if self.bee.is_dancing:
             return
-        if self.spotted_food:
+        if self.bee.spotted_food:
             self.update_distance_to_hive()
             if self.is_around_hive():
                 self.dance()
@@ -21,21 +21,21 @@ class Scout(ArtificialBeeColonyBehaviour):
             return
         spotted_food = self.spot_food()
         if spotted_food:
-            self.spotted_food = spotted_food
+            self.bee.spotted_food = spotted_food
             return
-        if self.scout_steps * np.random.rand() > 10:
+        if self.bee.scout_steps * np.random.rand() > 10:
             self.random_direction()
-            self.scout_steps = 0
-        self.go_towards_direction(self.current_direction, self.speed)
-        self.scout_steps += 1
+            self.bee.scout_steps = 0
+        self.go_towards_direction(self.bee.current_direction, self.speed)
+        self.bee.scout_steps += 1
 
     def dance(self):
-        self.is_dancing = True
-        food_distance_from_hive = self.get_distance(self.bee.hive.x, self.spotted_food.x,
-                                                    self.bee.hive.y, self.spotted_food.y)
-        self.overall_food_quality = self.dance_intensity.set_dance_intensity(
-            food_distance_from_hive, self.spotted_food.count_of_flowers)
-        self.bee.hive.current_dances.append((self, self.spotted_food, self.overall_food_quality))
+        self.bee.is_dancing = True
+        food_distance_from_hive = self.get_distance(self.bee.hive.x, self.bee.spotted_food.x,
+                                                    self.bee.hive.y, self.bee.spotted_food.y)
+        self.bee.overall_food_quality = self.bee.dance_intensity.set_dance_intensity(
+            food_distance_from_hive, self.bee.spotted_food.count_of_flowers)
+        self.bee.hive.current_dances.append((self, self.bee.spotted_food, self.bee.overall_food_quality))
 
     def spot_food(self):
         foods = self.bee.hive.world.get_food_in_range(self.bee.x, self.bee.y, bee_sight_range)
@@ -46,4 +46,15 @@ class Scout(ArtificialBeeColonyBehaviour):
         return None
 
     def random_direction(self):
-        self.current_direction = math.pi * 2 * np.random.rand()
+        self.bee.current_direction = math.pi * 2 * np.random.rand()
+
+    def ack_onlooker(self):
+        self.bee.acked_onlookers += 1
+        if self.bee.acked_onlookers >= (self.bee.spotted_food.current_amount / self.max_carry) - 1:
+            self.bee.role = self.bee.become_employed()  # ale czemu ???
+            self.bee.hive.current_dances.remove((self, self.bee.spotted_food, self.bee.overall_food_quality))
+            self.bee.my_food_source = self.bee.spotted_food
+            self.bee.spotted_food = None
+            self.bee.hive.current_scouts -= 1
+            self.bee.acked_onlookers = 0
+            self.bee.is_dancing = False
