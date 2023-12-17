@@ -57,12 +57,18 @@ class Bee:
         self.role_tag = Role.scout
 
     def act(self):
-        try:
-            if self.role.is_too_old():
-                self.role.die()
-            self.role.act()
-        except AttributeError:
-            self.role = Onlooker(self)
+        # try:
+        #     if self.role.is_too_old():
+        #         self.role.die()
+        #     self.role.act()
+        # except AttributeError:
+        #     self.role = Onlooker(self)
+        if self.role is None:
+            self.role = Employed(self)
+            print("none xxd")
+        if self.role.is_too_old():
+            self.role.die()
+        self.role.act()
 
     def get_x(self) -> float:
         return self.x
