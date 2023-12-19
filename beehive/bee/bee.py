@@ -36,12 +36,8 @@ class Bee:
 
     def init_role(self):
         if np.random.rand() < 0.8:
-            # self.role_tag = Role.scout
-            # return Scout(self)
             return Role.onlooker, Onlooker(self)
         else:
-            # self.role_tag = Role.onlooker
-            # return Onlooker(self)
             return Role.scout, Scout(self)
 
     def become_onlooker(self):
@@ -57,15 +53,6 @@ class Bee:
         self.role_tag = Role.scout
 
     def act(self):
-        # try:
-        #     if self.role.is_too_old():
-        #         self.role.die()
-        #     self.role.act()
-        # except AttributeError:
-        #     self.role = Onlooker(self)
-        if self.role is None:
-            self.role = Employed(self)
-            print("none xxd")
         if self.role.is_too_old():
             self.role.die()
         self.role.act()

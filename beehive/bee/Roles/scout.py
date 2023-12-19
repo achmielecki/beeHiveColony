@@ -51,7 +51,7 @@ class Scout(ArtificialBeeColonyBehaviour):
     def ack_onlooker(self):
         self.bee.acked_onlookers += 1
         if self.bee.acked_onlookers >= (self.bee.spotted_food.current_amount / self.max_carry) - 1:
-            self.bee.role = self.bee.become_employed()
+            self.bee.become_employed()
             self.bee.hive.current_dances.remove((self, self.bee.spotted_food, self.bee.overall_food_quality))
             self.bee.my_food_source = self.bee.spotted_food
             self.bee.spotted_food = None

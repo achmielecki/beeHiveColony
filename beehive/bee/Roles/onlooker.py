@@ -38,12 +38,7 @@ class Onlooker(ArtificialBeeColonyBehaviour):
         return chance_of_becoming_scout
 
     def choose_best_dance(self):
-        try:
-            dances = self.bee.hive.get_current_dances()
-            dance = list(sorted(dances, key=lambda it: it[2]))[-1]
-            dance[0].ack_onlooker()
-            return dance[1]
-        except AttributeError:
-            pass
-
-
+        dances = self.bee.hive.get_current_dances()
+        dance = list(sorted(dances, key=lambda it: it[2]))[-1]
+        dance[0].ack_onlooker()
+        return dance[1]
