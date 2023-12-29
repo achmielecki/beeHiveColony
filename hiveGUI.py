@@ -35,11 +35,11 @@ class HiveGUI:
 
     def draw_hive_bees(self, hive):
         for bee in hive.get_bees():
-            if bee.behaviour.role == Role.scout:
+            if bee.role_tag == Role.scout:
                 pygame.draw.circle(self.screen, (204, 102, 0), (self.scale(bee.get_x()), self.scale(bee.get_y())), 3)
-            elif bee.behaviour.role == Role.employed_in_hive:
+            elif bee.role_tag == Role.employed_in_hive:
                 pass
-            elif bee.behaviour.is_dancing:
+            elif bee.is_dancing:
                 pygame.draw.circle(self.screen, (255, 0, 0), (self.scale(bee.get_x()), self.scale(bee.get_y())), 3)
             else:
                 pygame.draw.circle(self.screen, (0, 0, 255), (self.scale(bee.get_x()), self.scale(bee.get_y())), 3)
