@@ -25,6 +25,7 @@ class HiveGUI:
 
         pygame.init()
         self.font = pygame.font.SysFont('Comic Sans MS', 22)
+        self.font_title = pygame.font.SysFont('Comic Sans MS', 22, bold=True)
 
     def run(self):
         running = True
@@ -85,6 +86,8 @@ class HiveGUI:
 
     def draw_side_panel(self, hive, world):
         time = world.get_time()
+        temp = world.get_week_temps()
+        rainfall = world.get_week_rainfall()
 
         # tło panelu bocznego
         self.screen.blit(self.honeycomb_img, (self.simulation_dimension, 0))
@@ -98,33 +101,50 @@ class HiveGUI:
         self.screen.blit(time_text, (self.width - 80, 30))
 
         # pogoda
-        temperature_text = self.font.render('Temperatura: ' + '--' + ' °C', True, (0, 0, 0))
-        self.screen.blit(temperature_text, (self.width - 380, 100))
+        temperature_text = self.font.render('Temperatura: ' + str(temp[time.day]) + ' °C', True, (0, 0, 0))
+        self.screen.blit(temperature_text, (self.width - 380, 80))
 
-        humidity_text = self.font.render('Wilgotność: ' + '--' + '%', True, (0, 0, 0))
-        self.screen.blit(humidity_text, (self.width - 380, 150))
+        humidity_text = self.font.render('Opady: ' + str(rainfall[time.day]) + ' mm', True, (0, 0, 0))
+        self.screen.blit(humidity_text, (self.width - 380, 120))
 
-        # statystyki ula
-        statistics_text = self.font.render('STATYSTYKI:', True, (0, 0, 0))
-        self.screen.blit(statistics_text, (self.width - 380, 250))
-
-        food_text = self.font.render('Zebrany nektar: ' + str(round(hive.nectar_stored, 3)) + ' g', True, (0, 0, 0))
-        self.screen.blit(food_text, (self.width - 380, 300))
-
-        food_text = self.font.render('Prognoza zbiorów na dziś: ' + str(round(hive.nectar_goal, 3)) + ' g', True, (0, 0, 0))
-        self.screen.blit(food_text, (self.width - 380, 350))
-
-        bee_text = self.font.render('Pszczoły wylatujące z ula: ' + str(len(hive.bees)), True, (0, 0, 0))
-        self.screen.blit(bee_text, (self.width - 380, 400))
-
-        bee_text = self.font.render('Umarłe pszczoły: ' + str(hive.dead_bees), True, (0, 0, 0))
-        self.screen.blit(bee_text, (self.width - 380, 450))
+        # prognoza pogody na cały tydzień
+        statistics_text = self.font_title.render('PROGNOZA POGODY:', True, (0, 0, 0))
+        self.screen.blit(statistics_text, (self.width - 380, 180))
+        statistics_text = self.font.render('Dzień:', True, (0, 0, 0))
+        self.screen.blit(statistics_text, (self.width - 380, 230))
+        statistics_text = self.font.render('Temp. [°C]:', True, (0, 0, 0))
+        self.screen.blit(statistics_text, (self.width - 380, 280))
+        statistics_text = self.font.render('Opady [mm]:', True, (0, 0, 0))
+        self.screen.blit(statistics_text, (self.width - 380, 330))
+        for i in range(time.day, 7):
+            day_text = self.font.render(str(i+1), True, (0, 0, 0))
+            self.screen.blit(day_text, (self.width - 280 + (i * 40), 230))
+            temp_text = self.font.render(str(temp[i]), True, (0, 0, 0))
+            self.screen.blit(temp_text, (self.width - 280 + (i * 40), 280))
+            rain_text = self.font.render(str(rainfall[i]), True, (0, 0, 0))
+            self.screen.blit(rain_text, (self.width - 280 + (i * 40), 330))
 
         # ustawienia użytkownika
         # TODO
 
+        # statystyki ula
+        statistics_text = self.font_title.render('STATYSTYKI ULA:', True, (0, 0, 0))
+        self.screen.blit(statistics_text, (self.width - 380, 400))
+
+        food_text = self.font.render('Zebrany nektar: ' + str(round(hive.nectar_stored, 3)) + ' g', True, (0, 0, 0))
+        self.screen.blit(food_text, (self.width - 380, 450))
+
+        food_text = self.font.render('Prognoza zbiorów na dziś: ' + str(round(hive.nectar_goal, 3)) + ' g', True, (0, 0, 0))
+        self.screen.blit(food_text, (self.width - 380, 500))
+
+        bee_text = self.font.render('Pszczoły wylatujące z ula: ' + str(len(hive.bees)), True, (0, 0, 0))
+        self.screen.blit(bee_text, (self.width - 380, 550))
+
+        bee_text = self.font.render('Umarłe pszczoły: ' + str(hive.dead_bees), True, (0, 0, 0))
+        self.screen.blit(bee_text, (self.width - 380, 600))
+
         # legenda
-        legend_text = self.font.render('LEGENDA:', True, (0, 0, 0))
+        legend_text = self.font_title.render('LEGENDA:', True, (0, 0, 0))
         self.screen.blit(legend_text, (self.width - 380, 680))
 
         scaled_hive_img = pygame.transform.scale(self.hive_img, (40, 40))
