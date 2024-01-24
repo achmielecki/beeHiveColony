@@ -128,14 +128,14 @@ class HiveGUI:
         self.screen.blit(statistics_text, (self.width - 380, 330))
         for i in range(time.day, 7):
             day_text = self.font.render(str(i+1), True, (0, 0, 0))
-            self.screen.blit(day_text, (self.width - 280 + (i * 40), 230))
+            day_text_rect = day_text.get_rect(midtop=(self.width - 270 + (i * 40), 230))
+            self.screen.blit(day_text, day_text_rect)
             temp_text = self.font.render(str(temp[i]), True, (0, 0, 0))
-            self.screen.blit(temp_text, (self.width - 280 + (i * 40), 280))
+            temp_text_rect = temp_text.get_rect(midtop=(self.width - 270 + (i * 40), 280))
+            self.screen.blit(temp_text, temp_text_rect)
             rain_text = self.font.render(str(rainfall[i]), True, (0, 0, 0))
-            self.screen.blit(rain_text, (self.width - 280 + (i * 40), 330))
-
-        # ustawienia użytkownika
-        # TODO
+            rain_text_rect = rain_text.get_rect(midtop=(self.width - 270 + (i * 40), 330))
+            self.screen.blit(rain_text, rain_text_rect)
 
         # statystyki ula
         statistics_text = self.font_title.render('STATYSTYKI ULA:', True, (0, 0, 0))
