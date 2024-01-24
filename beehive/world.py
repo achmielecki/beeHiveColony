@@ -90,12 +90,12 @@ class World:
                     hive.simulate()
             for food in self.food_sources:
                 food.simulate()
+        if self.time.second == 0:
+            self.print_stuff()
         self.time_goes_forward()
 
     def time_goes_forward(self, seconds=1):
         self.time += datetime.timedelta(seconds=seconds)
-        if self.time.second == 0:
-            self.print_stuff()
 
     def print_stuff(self):
         print("===================")
@@ -103,9 +103,12 @@ class World:
         for hive in self.hives:
             print("bees: " + str(len(hive.bees)))
             print("dead_bees: " + str(hive.dead_bees))
-            print("food: " + str(hive.nectar_stored))
-            print("today prognosed food: " + str(hive.nectar_goal))
+            print("nectar: " + str(hive.nectar_stored))
+            print("today prognosed nectar: " + str(hive.nectar_goal))
             print("difference: " + str(hive.nectar_stored - hive.nectar_goal))
+            print("global nectar value: " + str(self.get_global_nectar_value()))
+            print("temperature for week: " + str(self.get_week_temps()))
+            print("rainfall for week: " + str(self.get_week_rainfall()))
 
     def set_week_temps(self, temps):
         self.week_temps = temps
