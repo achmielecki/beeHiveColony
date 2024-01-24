@@ -13,12 +13,16 @@ class HiveGUI:
 
         self.grass_img = pygame.image.load('assets/grass.png')
         self.honeycomb_img = pygame.image.load('assets/honeycomb.png')
+        self.honeycomb_bg_img = pygame.image.load('assets/honeycomb_with_bees_background.png')
         self.bee_img_blue = pygame.image.load('assets/bee1_left_blue.png')
         self.bee_img_orange = pygame.image.load('assets/bee1_left_orange.png')
         self.bee_img_red = pygame.image.load('assets/bee1_left_red.png')
         self.hive_img = pygame.image.load('assets/bee_hive.png')
         self.bush_img = pygame.image.load('assets/bush.png')
         self.bush_flower_img = pygame.image.load('assets/bush_flowers.png')
+
+        self.chosen_temps = self.world.get_week_temps()
+        self.chosen_rainfall = self.world.get_week_rainfall()
 
         pygame.display.set_caption("Wizualne modelowanie ula pszczelego")
         pygame.display.set_icon(self.bee_img_orange)
@@ -28,14 +32,20 @@ class HiveGUI:
         self.font_title = pygame.font.SysFont('Comic Sans MS', 22, bold=True)
 
     def run(self):
-        running = True
+        running = False
+
+        while not running:
+            for event in pygame.event.get():
+                running = self.draw_start_screen(event)
+
+                pygame.display.flip()
+
         while running:
             self.world.simulate()
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     running = False
 
-            self.screen.fill((226, 177, 86))
             self.screen.blit(self.grass_img, (0, 0))
             self.draw_world()
 
@@ -101,10 +111,10 @@ class HiveGUI:
         self.screen.blit(time_text, (self.width - 80, 30))
 
         # pogoda
-        temperature_text = self.font.render('Temperatura: ' + str(temp[time.day]) + ' °C', True, (0, 0, 0))
+        temperature_text = self.font.render('Temperatura: ' + str(temp[time.day-1]) + ' °C', True, (0, 0, 0))
         self.screen.blit(temperature_text, (self.width - 380, 80))
 
-        humidity_text = self.font.render('Opady: ' + str(rainfall[time.day]) + ' mm', True, (0, 0, 0))
+        humidity_text = self.font.render('Opady: ' + str(rainfall[time.day-1]) + ' mm', True, (0, 0, 0))
         self.screen.blit(humidity_text, (self.width - 380, 120))
 
         # prognoza pogody na cały tydzień
@@ -177,3 +187,121 @@ class HiveGUI:
         legend_bee_harvesting_text = self.font.render('- pszczoła zbieraczka', True, (0, 0, 0))
         legend_bee_harvesting_text_rect = legend_bee_harvesting_text.get_rect(midleft=(self.width - 320, 950))
         self.screen.blit(legend_bee_harvesting_text, legend_bee_harvesting_text_rect)
+
+    def draw_start_screen(self, event):
+        self.screen.blit(self.honeycomb_bg_img, (0, 0))
+
+        title_text = self.font_title.render('USTAW POGODĘ NA TYDZIEŃ SYMULACJI', True, (0, 0, 0))
+        title_text_rect = title_text.get_rect(center=(self.width / 2, 100))
+        self.screen.blit(title_text, title_text_rect)
+
+        instruction_text = self.font.render('Wybierz odpowiednie wartości za pomocą pokrętła myszy lub strzałek na '
+                                            'ekranie.', True, (0, 0, 0))
+        instruction_text_rect = instruction_text.get_rect(center=(self.width / 2, 150))
+        self.screen.blit(instruction_text, instruction_text_rect)
+
+        day_text = self.font_title.render('DZIEŃ:', True, (0, 0, 0))
+        day_text_rect = day_text.get_rect(midright=(180, 250))
+        self.screen.blit(day_text, day_text_rect)
+
+        temp_text = self.font_title.render('Temperatura:', True, (0, 0, 0))
+        temp_text_rect = temp_text.get_rect(midright=(180, 400))
+        self.screen.blit(temp_text, temp_text_rect)
+
+        temp_unit_text = self.font_title.render('°C', True, (0, 0, 0))
+        temp_unit_text_rect = temp_unit_text.get_rect(midleft=(self.width - 180, 400))
+        self.screen.blit(temp_unit_text, temp_unit_text_rect)
+
+        rainfall_text = self.font_title.render('Opady:', True, (0, 0, 0))
+        rainfall_text_rect = rainfall_text.get_rect(midright=(180, 625))
+        self.screen.blit(rainfall_text, rainfall_text_rect)
+
+        rainfall_unit_text = self.font_title.render('mm', True, (0, 0, 0))
+        rainfall_unit_text_rect = rainfall_unit_text.get_rect(midleft=(self.width - 180, 625))
+        self.screen.blit(rainfall_unit_text, rainfall_unit_text_rect)
+
+        # pola wyboru wartości przez użytkownika
+        for i in range(0, 7):
+            day_number_text = self.font_title.render(str(i+1), True, (0, 0, 0))
+            day_number_text_rect = day_number_text.get_rect(center=(250 + (i * 150), 250))
+            self.screen.blit(day_number_text, day_number_text_rect)
+
+            self.chosen_temps[i] = self.draw_number_input(250 + (i * 150), 325, self.chosen_temps[i], 1)
+            self.chosen_rainfall[i] = self.draw_number_input(250 + (i * 150), 550, self.chosen_rainfall[i], 0.5, 0)
+
+        mouse_x, mouse_y = pygame.mouse.get_pos()
+        button_width, button_height = (350, 80)  # wymiary przycisku
+        button_x, button_y = (self.width / 2 - button_width / 2, self.height / 2 - button_height / 2 + 350)  # pozycja przycisku
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            if button_x <= mouse_x <= button_x + button_width and button_y <= mouse_y <= button_y + button_height:
+                self.world.set_week_temps(self.chosen_temps)
+                self.world.set_week_rainfall(self.chosen_rainfall)
+                return True  # Kliknięcie w przycisk ustawia running na True
+
+        # Renderowanie przycisku
+        mouse_x, mouse_y = pygame.mouse.get_pos()
+        if button_x <= mouse_x <= button_x + button_width and button_y <= mouse_y <= button_y + button_height:
+            pygame.draw.rect(self.screen, (187, 135, 0), [button_x, button_y, button_width, button_height])
+        else:
+            pygame.draw.rect(self.screen, (230, 168, 0), [button_x, button_y, button_width, button_height])
+
+        # Tekst na przycisku
+        text = self.font_title.render("ROZPOCZNIJ SYMULACJĘ", True, (0, 0, 0))
+        text_rect = text.get_rect(center=(button_x + button_width / 2, button_y + button_height / 2))
+        self.screen.blit(text, text_rect)
+
+    def draw_number_input(self, x, y, number, step, min_val=None):
+        up_arrow_points = [[x, y], [x - 25, y + 25], [x + 25, y + 25]]
+        down_arrow_points = [[x, y + 150], [x - 25, y + 125], [x + 25, y + 125]]
+
+        def is_point_inside_triangle(point, vertices):
+            def sign(p1, p2, p3):
+                return (p1[0] - p3[0]) * (p2[1] - p3[1]) - (p2[0] - p3[0]) * (p1[1] - p3[1])
+
+            b1 = sign(point, vertices[0], vertices[1]) < 0.0
+            b2 = sign(point, vertices[1], vertices[2]) < 0.0
+            b3 = sign(point, vertices[2], vertices[0]) < 0.0
+
+            return (b1 == b2) and (b2 == b3)
+
+        mouse_x, mouse_y = pygame.mouse.get_pos()
+
+        # obsługa kliknięcia myszy w strzałkę
+        if is_point_inside_triangle((mouse_x, mouse_y), up_arrow_points):
+            pygame.draw.polygon(self.screen, (187, 135, 0), up_arrow_points)
+            if pygame.mouse.get_pressed()[0]:
+                number += step
+        else:
+            pygame.draw.polygon(self.screen, "black", up_arrow_points)
+
+        number_text = self.font_title.render(str(number), True, (0, 0, 0))
+        number_rect = number_text.get_rect(center=(x, y + 75))
+        self.screen.blit(number_text, number_rect)
+
+        # obsługa kliknięcia myszy w strzałkę
+        if is_point_inside_triangle((mouse_x, mouse_y), down_arrow_points) and (min_val is None or number > min_val):
+            pygame.draw.polygon(self.screen, (187, 135, 0), down_arrow_points)
+            if pygame.mouse.get_pressed()[0]:
+                number -= step
+        else:
+            pygame.draw.polygon(self.screen, "black", down_arrow_points)
+
+        # obsługa pokrętła myszy
+        if (
+                up_arrow_points[1][0] <= mouse_x <= up_arrow_points[2][0] and
+                down_arrow_points[1][0] <= mouse_x <= down_arrow_points[2][0] and
+                up_arrow_points[0][1] <= mouse_y <= down_arrow_points[0][1]
+        ):
+            for event in pygame.event.get():
+                if event.type == pygame.MOUSEBUTTONDOWN and event.button == 4:  # Ruch kółkiem myszy w górę
+                    number += step
+                elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 5 and (min_val is None or number > min_val):  # Ruch kółkiem myszy w dół
+                    number -= step
+
+        # usunięcie zer po przecinku
+        if int(number) == number:
+            number = int(number)
+
+        return number
+
+
