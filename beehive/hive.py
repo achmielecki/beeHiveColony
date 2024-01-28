@@ -16,7 +16,6 @@ class Hive:
             y,
             area_size=40
     ):
-        self.food_stored = 0
         self.world = world
         self.num_bees = num_bees
         self.x = x
