@@ -1,6 +1,6 @@
-import datetime
-
+import matplotlib.pyplot as plt
 import numpy as np
+import datetime
 
 from beehive.foodSource import FoodSource
 from beehive.hive import Hive
@@ -32,6 +32,8 @@ class World:
         self.food_sources = []
         self.spawn_hives(num_hives)
         self.spawn_food(num_food_sources, world_size)
+        self.week_temps = [20, 20, 20, 20, 20, 20, 20]
+        self.week_rainfall = [0, 0, 0, 0, 0, 0, 0]
 
     def spawn_food(self, num_food_sources, world_size):
         for i in range(num_food_sources):
@@ -108,11 +110,17 @@ class World:
             print("temperature for week: " + str(self.get_week_temps()))
             print("rainfall for week: " + str(self.get_week_rainfall()))
 
+    def set_week_temps(self, temps):
+        self.week_temps = temps
+
     def get_week_temps(self):
-        return [23.9, 17.2, 12.8, 12.8, 13.9, 15.0, 16.1]
+        return self.week_temps
+
+    def set_week_rainfall(self, rainfall):
+        self.week_rainfall = rainfall
 
     def get_week_rainfall(self):
-        return [0.0, 0.0, 1.0, 0.5, 0.0, 0.0, 0.3]
+        return self.week_rainfall
 
     def is_it_beginning_of_the_day(self):
         return self.time.second == 0 and self.time.hour == 5 and self.time.minute == 0
