@@ -87,7 +87,7 @@ class World:
                 else:
                     hive.simulate()
             for food in self.food_sources:
-                food.simulate()
+                food.simulate(self.time)
         if self.time.second == 0:
             self.print_stuff()
         self.time_goes_forward()
@@ -118,7 +118,7 @@ class World:
         return self.time.second == 0 and self.time.hour == 5 and self.time.minute == 0
 
     def is_it_dark(self):
-        return self.time.hour < 5 or self.time.hour > 20
+        return self.time.hour < 5 or self.time.hour > 18
 
     def get_time(self):
         return self.time

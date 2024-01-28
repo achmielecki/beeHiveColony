@@ -20,9 +20,14 @@ class Scout(ArtificialBeeColonyBehaviour):
                 self.go_to_hive()
             return
         spotted_food = self.spot_food()
+        if self.get_distance(self.bee.get_x(), self.bee.get_y(), self.bee.hive.get_y(),self.bee.hive.get_y()) > world_size:
+            self.go_to_hive()
+            return
+
         if spotted_food:
             self.bee.spotted_food = spotted_food
             return
+
         if self.bee.scout_steps * np.random.rand() > 10:
             self.random_direction()
             self.bee.scout_steps = 0
@@ -41,7 +46,7 @@ class Scout(ArtificialBeeColonyBehaviour):
         foods = self.bee.hive.world.get_food_in_range(self.bee.x, self.bee.y, bee_sight_range)
         foods = list(filter(lambda it: it.current_amount > flower_max_nectar_carry and it.discovered is False, foods))
         if foods:
-            foods[0].spot()
+            foods[0].spot(self.bee.hive.world.time)
             return foods[0]
         return None
 

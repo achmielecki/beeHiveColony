@@ -2,6 +2,7 @@ from beehive.bee.artificialBeeColonyBehaviour import Role
 from beehive.bee.Roles.employed import Employed
 from beehive.bee.Roles.scout import Scout
 from beehive.bee.Roles.onlooker import Onlooker
+from beehive.bee.Roles.inHive import InHive
 import beehive.bee.Logic.goForFood as gff
 import numpy as np
 import uuid
@@ -36,9 +37,11 @@ class Bee:
 
     def init_role(self):
         if np.random.rand() < 0.8:
-            return Role.onlooker, Onlooker(self)
+            #return Role.onlooker, Onlooker(self)
+            return Role.employed_in_hive, InHive(self)
         else:
-            return Role.scout, Scout(self)
+            #return Role.scout, Scout(self)
+            return Role.onlooker, Onlooker(self)
 
     def become_onlooker(self):
         self.role = Onlooker(self)
