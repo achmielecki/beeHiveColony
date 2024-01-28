@@ -37,13 +37,10 @@ class FoodSource:
         self.respawn_nectar(current_time)
 
     def respawn_nectar(self, current_time):
-        if self.discovered is True and current_time - self.last_gathered == datetime.timedelta(hours=12):
+        if self.discovered is True and current_time - self.last_gathered == datetime.timedelta(hours=forget_food_source_hours):
             self.discovered = False
         if self.current_amount < self.max_amount:
             self.current_amount += self.spawn_rate
-            # if self.has_nectar_for_at_least_two_bees():
-            #     self.discovered = False
-            # TODO: mechanism for queueing respawned nectar to harvest and abandon slowly growing food sources
 
     def has_nectar_for_at_least_two_bees(self):
         return self.current_amount > bee_nectar_max_carry * 2
