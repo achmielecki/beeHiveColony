@@ -68,12 +68,12 @@ class HiveGUI:
     def draw_hive_bees(self, hive):
         for bee in hive.get_bees():
             if self.scale(bee.get_x()) < 1000:
-                if bee.behaviour.role == Role.scout:
+                if bee.role_tag == Role.scout:
                     bee_rect = self.bee_img_orange.get_rect(center=(self.scale(bee.get_x()), self.scale(bee.get_y())))
                     self.screen.blit(self.bee_img_orange, bee_rect)
-                elif bee.behaviour.role == Role.employed_in_hive:
+                elif bee.role_tag == Role.employed_in_hive:
                     pass
-                elif bee.behaviour.is_dancing:
+                elif bee.is_dancing:
                     pass
                 else:
                     bee_rect = self.bee_img_blue.get_rect(center=(self.scale(bee.get_x()), self.scale(bee.get_y())))
