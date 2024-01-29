@@ -12,6 +12,7 @@ world_size = 2000
 daily_bee_spawn_rate = 50
 flower_nectar_respawn_rate = 0.0005
 forget_food_source_hours = 12
+debug_mode = True
 
 #### variables for model of competition
 
