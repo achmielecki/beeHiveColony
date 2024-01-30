@@ -19,11 +19,12 @@ class Scout(ArtificialBeeColonyBehaviour):
             else:
                 self.go_to_hive()
             return
-        spotted_food = self.spot_food()
+
         if self.get_distance(self.bee.get_x(), self.bee.get_y(), self.bee.hive.get_y(),self.bee.hive.get_y()) > world_size:
             self.go_to_hive()
             return
 
+        spotted_food = self.spot_food()
         if spotted_food:
             self.bee.spotted_food = spotted_food
             return

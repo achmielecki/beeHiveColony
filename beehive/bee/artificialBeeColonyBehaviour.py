@@ -1,7 +1,7 @@
 import datetime
 from enum import Enum
-# import beehive.bee.Logic.leaveHive as lh
-import beehive.bee.Logic.goForFood as gff
+# import beehive.bee.logic.leaveHive as lh
+import beehive.bee.logic.goForFood as gff
 import numpy as np
 import math
 from beehive.constVariables import *

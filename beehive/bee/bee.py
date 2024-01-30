@@ -1,9 +1,9 @@
 from beehive.bee.artificialBeeColonyBehaviour import Role
-from beehive.bee.Roles.employed import Employed
-from beehive.bee.Roles.scout import Scout
-from beehive.bee.Roles.onlooker import Onlooker
-from beehive.bee.Roles.inHive import InHive
-import beehive.bee.Logic.goForFood as gff
+from beehive.bee.roles.employed import Employed
+from beehive.bee.roles.scout import Scout
+from beehive.bee.roles.onlooker import Onlooker
+from beehive.bee.roles.inHive import InHive
+import beehive.bee.logic.goForFood as gff
 import numpy as np
 import uuid
 
