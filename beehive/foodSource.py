@@ -1,3 +1,5 @@
+import datetime
+
 import numpy as np
 from beehive.constVariables import *
 
@@ -15,10 +17,12 @@ class FoodSource:
         self.y = y
         self.max_amount = flower_max_nectar_carry * self.count_of_flowers
         self.current_amount = self.max_amount
+        self.last_gathered = datetime.datetime.now()
         self.discovered = False
 
-    def spot(self):
+    def spot(self, current_time):
         self.discovered = True
+        self.last_gathered = current_time
 
     def get_pos(self):
         return self.x, self.y
@@ -29,15 +33,14 @@ class FoodSource:
     def get_y(self):
         return self.y
 
-    def simulate(self):
-        self.respawn_nectar()
+    def simulate(self, current_time):
+        self.respawn_nectar(current_time)
 
-    def respawn_nectar(self):
+    def respawn_nectar(self, current_time):
+        if self.discovered is True and current_time - self.last_gathered == datetime.timedelta(hours=forget_food_source_hours):
+            self.discovered = False
         if self.current_amount < self.max_amount:
             self.current_amount += self.spawn_rate
-            # if self.has_nectar_for_at_least_two_bees():
-            #     self.discovered = False
-            # TODO: mechanism for queueing respawned nectar to harvest and abandon slowly growing food sources
 
     def has_nectar_for_at_least_two_bees(self):
         return self.current_amount > bee_nectar_max_carry * 2

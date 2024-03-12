@@ -37,6 +37,7 @@ class Employed(ArtificialBeeColonyBehaviour):
     def harvest(self):
         amount_that_can_be_harvested = min(self.max_carry / 4, self.max_carry - self.bee.carried_nectar)
         self.bee.carried_nectar = self.bee.my_food_source.extract_food(amount_that_can_be_harvested)
+        self.bee.my_food_source.last_gathered = self.bee.hive.world.time
 
     def my_food_is_not_efficient_anymore(self):
         return self.bee.my_food_source.current_amount < self.max_carry
